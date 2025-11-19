@@ -11,13 +11,12 @@ import com.example.media_converter_app.fragments.YoutubeFragment;
 
 public class PagerAdapter extends FragmentStateAdapter {
 
-    public PagerAdapter(@NonNull FragmentActivity fragment) {
-        super(fragment);
+    public PagerAdapter(@NonNull FragmentActivity fragmentActivity) {
+        super(fragmentActivity);
     }
 
     @NonNull
     @Override
-
     public Fragment createFragment(int position) {
         switch (position) {
             case 0:
@@ -31,8 +30,8 @@ public class PagerAdapter extends FragmentStateAdapter {
         }
     }
 
-    public int itemCount() {
+    @Override
+    public int getItemCount() {
         return 3;
     }
-
 }
