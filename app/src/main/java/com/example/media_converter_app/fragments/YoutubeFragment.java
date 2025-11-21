@@ -2,11 +2,6 @@ package com.example.media_converter_app.fragments;
 
 import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
-
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.content.Context;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
@@ -20,12 +15,11 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
 import androidx.fragment.app.Fragment;
 
 import com.example.media_converter_app.R;
 import com.example.media_converter_app.UnsafeOkHttpClient;
+import com.example.media_converter_app.NotificationClass;
 
 import org.json.JSONObject;
 
@@ -130,7 +124,8 @@ public class YoutubeFragment extends Fragment {
         JSONObject json = new JSONObject();
 
         if (ytURL.isEmpty()) {
-            Toast.makeText(requireContext(), "Please enter a URL...", Toast.LENGTH_SHORT);
+            Toast.makeText(requireContext(), "Please enter a URL...", Toast.LENGTH_SHORT).show();
+            convertButton.setClickable(true);
             return;
         }
 
@@ -169,9 +164,11 @@ public class YoutubeFragment extends Fragment {
                 String fileName = jsonObject.getString("filename");
 
                 requireActivity().runOnUiThread(() -> {
-                    convertButton.setVisibility(View.INVISIBLE);
-                    downloadButton.setVisibility(View.VISIBLE);
+                    convertButton.setVisibility(INVISIBLE);
+                    convertButton.setClickable(false);
+                    downloadButton.setVisibility(VISIBLE);
                     downloadButton.setClickable(true);
+                    NotificationClass.pushNotification(getContext(), "conversion", fileName);
 
                     downloadButton.setOnClickListener(v -> {
                         downloadButton.setClickable(false);
@@ -197,7 +194,7 @@ public class YoutubeFragment extends Fragment {
             requireActivity().runOnUiThread(() -> {
                 Toast.makeText(requireContext(), "No file ready to download...", Toast.LENGTH_SHORT).show();
                 downloadButton.setVisibility(View.INVISIBLE);
-
+                downloadButton.setClickable(false);
                 convertButton.setVisibility(View.VISIBLE);
                 convertButton.setClickable(true);
             });
@@ -232,7 +229,7 @@ public class YoutubeFragment extends Fragment {
                     return;
                 }
 
-                // --- Download file ---
+                // --- download file ---
                 InputStream inputStream = response.body().byteStream();
                 File downloadDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
                 File file = new File(downloadDirectory, filename);
@@ -271,7 +268,7 @@ public class YoutubeFragment extends Fragment {
 
     private void deleteBackendFile(String filename) {
         JSONObject json = new JSONObject();
-        pushNotification("download");
+        NotificationClass.pushNotification(getContext(), "download", filename);
 
         try {
             json.put("filename", filename);
@@ -303,53 +300,6 @@ public class YoutubeFragment extends Fragment {
                 inputURL.setText("");
             });
         }).start();
-    }
-
-    private void pushNotification(String type) {
-        Context context = getContext();
-        if (context == null) return;
-        
-        String CHANNEL_ID = "conversion_channel";
-
-        String title = "";
-        String message = "";
-        String description = "";
-
-        if (type.equals("conversion")) {
-            title = "Conversion Completed";
-            message = "Your video is converted!";
-            description = "Notification when conversion is completed";
-        } else if (type.equals("download")) {
-            title = "Download Completed";
-            message = "Your video is downloaded!";
-            description = "Notification when download is completed";
-        }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(
-                    CHANNEL_ID,
-                    "Media Converter Notifications",
-                    NotificationManager.IMPORTANCE_DEFAULT
-            );
-
-            channel.setDescription(description);
-            channel.enableVibration(true);
-            channel.setVibrationPattern(new long[]{0, 500, 100, 500});
-
-            NotificationManager manager = context.getSystemService(NotificationManager.class);
-            manager.createNotificationChannel(channel);
-        }
-
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_launcher_foreground)
-                .setContentTitle(title)
-                .setContentText(message)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .setVibrate(new long[]{0, 500, 100, 500})
-                .setAutoCancel(true);
-
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
-        notificationManager.notify(1001, builder.build());
     }
 }
 

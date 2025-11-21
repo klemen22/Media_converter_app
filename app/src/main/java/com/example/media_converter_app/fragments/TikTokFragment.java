@@ -1,24 +1,228 @@
 package com.example.media_converter_app.fragments;
 
+import static android.view.View.INVISIBLE;
+import static android.view.View.VISIBLE;
+
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
 
+import com.example.media_converter_app.NotificationClass;
 import com.example.media_converter_app.R;
+import com.example.media_converter_app.UnsafeOkHttpClient;
+
+import org.json.JSONObject;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 public class TikTokFragment extends Fragment {
 
-    public TikTokFragment() {
-    }
+    private EditText inputURL;
+    private Button convertButton;
+    private Button downloadButton;
+
+    private final OkHttpClient client = UnsafeOkHttpClient.getUnsafeClient();
+    private final String baseAddr = "https://192.168.64.95:9999/api"; //change this slop, this aint it man
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstance) {
+        View view = inflater.inflate(R.layout.fragment_tiktok, container, false);
 
-        return inflater.inflate(R.layout.fragment_tiktok, container, false);
+        inputURL = view.findViewById(R.id.tiktokInput);
+        convertButton = view.findViewById(R.id.tiktokConvertBtn);
+        downloadButton = view.findViewById(R.id.tiktokDownloadBtn);
+
+        downloadButton.setVisibility(INVISIBLE);
+        downloadButton.setClickable(false);
+        convertButton.setVisibility(VISIBLE);
+        convertButton.setClickable(true);
+
+        convertButton.setOnClickListener(v -> {
+            convertButton.setClickable(false);
+            startConverting();
+        });
+
+        return view;
     }
 
+    private void startConverting(){
+        String tikURL = inputURL.getText().toString();
+        JSONObject json = new JSONObject();
 
+        if(tikURL.isEmpty()){
+            Toast.makeText(requireContext(), "Please enter a URL...", Toast.LENGTH_SHORT).show();
+            convertButton.setClickable(true);
+            return;
+        }
+
+        try{
+            json.put("url", tikURL);
+        } catch (Exception exception){
+            exception.printStackTrace();
+        }
+
+        RequestBody payloadBody = RequestBody.create(json.toString(), MediaType.parse("application/json; charset=utf-8"));
+        Request payload = new Request.Builder().url(baseAddr + "/tiktok/convert").post(payloadBody).build();
+
+        new Thread(() -> {
+            try{
+                Response response = client.newCall(payload).execute();
+
+                if(!response.isSuccessful()){
+                    requireActivity().runOnUiThread(() -> {
+                        Toast.makeText(requireContext(), "Error: " + response.code(), Toast.LENGTH_SHORT).show();
+                        convertButton.setClickable(true);
+                    });
+                    return;
+                }
+
+                assert response.body() != null;
+                String responseText = response.body().string();
+
+                JSONObject jsonObject = new JSONObject(responseText);
+                String filename = jsonObject.getString("filename");
+
+                requireActivity().runOnUiThread(() -> {
+                    convertButton.setVisibility(INVISIBLE);
+                    convertButton.setClickable(false);
+                    downloadButton.setVisibility(VISIBLE);
+                    downloadButton.setClickable(true);
+
+                    NotificationClass.pushNotification(getContext(), "conversion", filename);
+
+                    downloadButton.setOnClickListener(v->{
+                        downloadButton.setClickable(false);
+                        downloadTikTikMedia(filename);
+                    });
+
+                });
+
+
+            } catch (Exception exception){
+                exception.printStackTrace();
+
+                requireActivity().runOnUiThread(()->{
+                    Toast.makeText(requireContext(), "Error: " + exception, Toast.LENGTH_SHORT).show();
+                });
+            }
+        }).start();
+    }
+
+    private void downloadTikTikMedia(String filename){
+        if(filename == null){
+            requireActivity().runOnUiThread(()->{
+                Toast.makeText(requireContext(), "No file ready to download...", Toast.LENGTH_SHORT).show();
+                downloadButton.setVisibility(INVISIBLE);
+                downloadButton.setClickable(false);
+                convertButton.setVisibility(VISIBLE);
+                convertButton.setClickable(true);
+            });
+            return;
+        }
+
+        JSONObject json = new JSONObject();
+
+        try{
+            json.put("filename", filename);
+        } catch (Exception exception){
+            exception.printStackTrace();
+        }
+
+        RequestBody payloadBody = RequestBody.create(json.toString(),MediaType.parse("application/json; charset=utf-8"));
+
+        Request payload = new Request.Builder()
+                .url(baseAddr + "/tiktok/convert")
+                .post(payloadBody)
+                .build();
+
+        new Thread(() -> {
+            try{
+                Response response = client.newCall(payload).execute();
+
+                if(!response.isSuccessful()){
+                    requireActivity().runOnUiThread(()->{
+                        Toast.makeText(requireContext(), "Error: " + response.code(), Toast.LENGTH_SHORT).show();
+                        downloadButton.setClickable(true);
+                    });
+                    return;
+                }
+
+                InputStream inputStream = response.body().byteStream();
+                File downloadDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+                File file = new File(downloadDirectory, filename);
+
+                FileOutputStream fileOutputStream = new FileOutputStream(file);
+
+                byte[] buffer = new byte[4096];
+                int read;
+
+                while((read = inputStream.read(buffer)) != -1){
+                    fileOutputStream.write(buffer, 0, read);
+                }
+
+                fileOutputStream.flush();
+                fileOutputStream.close();
+                inputStream.close();
+
+                requireActivity().runOnUiThread(()->
+                        Toast.makeText(requireContext(), "Downloaded: " + filename, Toast.LENGTH_SHORT).show()
+
+                );
+            } catch (Exception exception){
+                exception.printStackTrace();
+
+                requireActivity().runOnUiThread(()->{
+                    Toast.makeText(requireContext(), "Error: " + exception, Toast.LENGTH_SHORT).show();
+                    downloadButton.setClickable(true);
+                });
+            }
+        }).start();
+    }
+
+    private void deleteBackendFile(String filename){
+        JSONObject json = new JSONObject();
+        NotificationClass.pushNotification(getContext(), "download", filename);
+
+        try{
+            json.put("filename", filename);
+        } catch (Exception ignored){}
+
+        RequestBody payloadBody = RequestBody.create(json.toString(),MediaType.parse("application/json; charset=utf-8"));
+
+        Request payload = new Request.Builder()
+                .url(baseAddr + "/tiktok/delete")
+                .delete(payloadBody)
+                .build();
+
+        new Thread(() -> {
+            try{
+                client.newCall(payload).execute();
+            } catch (Exception ignored){}
+
+            requireActivity().runOnUiThread(()->{
+                downloadButton.setClickable(false);
+                downloadButton.setVisibility(View.INVISIBLE);
+
+                convertButton.setVisibility(View.VISIBLE);
+                convertButton.setClickable(true);
+
+                inputURL.setText("");
+            });
+        }).start();
+    }
 }
