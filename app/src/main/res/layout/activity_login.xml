@@ -19,16 +19,16 @@
         android:gravity="end">
 
         <Spinner
-            android:id="@+id/serverSelect"
+            android:id="@+id/loginServerSelect"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:spinnerMode="dialog"
             android:gravity="center"
             android:layout_gravity="center"
-            android:layout_marginEnd="10dp"/>
+            android:layout_marginEnd="10dp" />
 
         <ImageView
-            android:id="@+id/connectionStatus"
+            android:id="@+id/loginConnectionStatus"
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:src="@drawable/broken_link_100" />
@@ -36,7 +36,7 @@
 
     <LinearLayout
         android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@id/connectionContainer"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -53,21 +53,27 @@
             android:textSize="30sp" />
 
         <EditText
+            android:id="@+id/loginUsername"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Username..." />
 
         <EditText
+            android:id="@+id/loginPassword"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Password..."
-            />
-
-        <Button
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:text="Login"/>
+            android:layout_marginTop="10dp"
+            android:hint="Password..." />
     </LinearLayout>
 
+    <Button
+        android:id="@+id/loginBtn"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="40dp"
+        android:text="Login"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginBottom="20dp" />
 </androidx.constraintlayout.widget.ConstraintLayout>
