@@ -2,6 +2,7 @@ package com.example.media_converter_app;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowInsets;
 import android.widget.Button;
@@ -18,6 +19,7 @@ import org.json.JSONObject;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class LoginActivity extends AppCompatActivity {
@@ -30,19 +32,16 @@ public class LoginActivity extends AppCompatActivity {
 
     String[] availableServers = {"https://192.168.64.95:9999", "https://100.104.214.108:9999"};
 
-    OkHttpClient client = new OkHttpClient();
+    OkHttpClient client = UnsafeOkHttpClient.getUnsafeClient();
 
     public static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
-
-    private String token = PreferencesClass.getToken(this);
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_login);
 
         View view = findViewById(android.R.id.content);
 
@@ -54,19 +53,31 @@ public class LoginActivity extends AppCompatActivity {
         });
 
         // check the token if present
-        checkInitialToken(token);
+        String token = PreferencesClass.getToken(this);
+        if (token != null) {
+            Log.d("TokenDebug", "Checking token...");
+            autoLogin(token);
+        }
 
-        loginUsername = view.findViewById(R.id.loginUsername);
-        loginPassword = view.findViewById(R.id.loginPassword);
-        loginBtn = view.findViewById(R.id.loginBtn);
-        loginConnectionStatus = view.findViewById(R.id.loginConnectionStatus);
-        loginServerSelect = view.findViewById(R.id.loginServerSelect);
+        loginUsername = findViewById(R.id.loginUsername);
+        loginPassword = findViewById(R.id.loginPassword);
+        loginBtn = findViewById(R.id.loginBtn);
+        loginConnectionStatus = findViewById(R.id.loginConnectionStatus);
+        loginServerSelect = findViewById(R.id.loginServerSelect);
 
+        loginBtn.setOnClickListener(v -> {
+            Log.d("LoginDebug", "Login button was pressed");
+            Login();
+        });
+
+        //ArrayAdapter<String> serverAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, availableServers);
+        //serverAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        //loginServerSelect.setAdapter(serverAdapter);
 
     }
 
 
-    private void checkInitialToken(String token) {
+    private void autoLogin(String token) {
         String url = PreferencesClass.getServer(this) + "/api/user_info";
 
         Request request = new Request.Builder().url(url).get().addHeader("Authorization", "Bearer " + token).build();
@@ -89,6 +100,9 @@ public class LoginActivity extends AppCompatActivity {
                 if (jsonObject.getString("status").equals("success")) {
                     PreferencesClass.setUser(this, jsonObject.getString("user"));
 
+                    Log.d("TokenDebug", "User" + jsonObject.getString("user"));
+                    Log.d("TokenDebug", "Token:" + token);
+
                     runOnUiThread(() -> {
                         startActivity(new Intent(LoginActivity.this, MainActivity.class));
                         finish();
@@ -109,5 +123,65 @@ public class LoginActivity extends AppCompatActivity {
                 });
             }
         }).start();
+    }
+
+    private void Login() {
+        String username = loginUsername.getText().toString();
+        String password = loginPassword.getText().toString();
+
+        String url = PreferencesClass.getServer(this) + "/api/login";
+        JSONObject jsonObject = new JSONObject();
+
+        try {
+            jsonObject.put("username", username);
+            jsonObject.put("password", password);
+        } catch (Exception exception) {
+            exception.printStackTrace();
+        }
+
+        RequestBody requestBody = RequestBody.create(jsonObject.toString(), MediaType.parse("application/json; charset=utf-8"));
+        Request request = new Request.Builder().url(url).post(requestBody).build();
+
+        new Thread(() -> {
+            try {
+                Response response = client.newCall(request).execute();
+                assert response.body() != null;
+                String responseText = response.body().string();
+                JSONObject responseJsonObject = new JSONObject(responseText);
+
+                if (responseJsonObject.getString("status").equals("success")) {
+                    PreferencesClass.setUser(this, username);
+                    PreferencesClass.setToken(this, responseJsonObject.getString("access_token"));
+
+                    // debug section
+                    Log.d("LoginDebug", "Login username: " + username);
+                    Log.d("LoginDebug", "Login token: " + responseJsonObject.getString("access_token"));
+
+                    runOnUiThread(() -> {
+                        Toast.makeText(this, "Login successful!", Toast.LENGTH_SHORT).show();
+                        startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                        finish();
+                    });
+
+                } else {
+                    Log.d("LoginDebug", "status: " + responseJsonObject.getString("status"));
+                    Log.d("LoginDebug", "Message: " + responseJsonObject.getString("message"));
+
+                    String message = responseJsonObject.getString("message"); // separate string because of exception
+
+                    runOnUiThread(() -> {
+                        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+                        return;
+                    });
+                }
+
+            } catch (Exception exception) {
+                exception.printStackTrace();
+                runOnUiThread(() -> {
+                    Toast.makeText(this, "Error: " + exception, Toast.LENGTH_SHORT).show();
+                });
+            }
+        }).start();
+
     }
 }

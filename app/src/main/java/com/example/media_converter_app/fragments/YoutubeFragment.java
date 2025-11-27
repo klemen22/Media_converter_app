@@ -1,7 +1,11 @@
 package com.example.media_converter_app.fragments;
 
+import static android.view.View.GONE;
 import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
+
+import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
@@ -12,14 +16,19 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
 
+import com.example.media_converter_app.LoginActivity;
+import com.example.media_converter_app.NotificationClass;
+import com.example.media_converter_app.PreferencesClass;
 import com.example.media_converter_app.R;
 import com.example.media_converter_app.UnsafeOkHttpClient;
-import com.example.media_converter_app.NotificationClass;
 
 import org.json.JSONObject;
 
@@ -27,6 +36,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 
+import eightbitlab.com.blurview.BlurTarget;
+import eightbitlab.com.blurview.BlurView;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -41,10 +52,21 @@ public class YoutubeFragment extends Fragment {
 
     private Button convertButton;
     private Button downloadButton;
+    private boolean alreadyRedirected = false;
+
+    private ImageView goBackButton;
+    private ImageView logOutButton;
+    private ImageView infoButton;
+
+    private BlurView blurView;
+    private BlurTarget blurTarget;
+    private TextView user;
+
+    private LinearLayout ytMenuButton;
 
     private final OkHttpClient client = UnsafeOkHttpClient.getUnsafeClient();
 
-    private final String baseAddr = "https://192.168.64.95:9999/api"; //change this slop, this aint it man
+    private final String baseAddr = "https://192.168.64.95:9999/api"; // default value
 
 
     @Override
@@ -56,6 +78,17 @@ public class YoutubeFragment extends Fragment {
         spinnerRes = view.findViewById(R.id.youtubeDropDownResolution);
         convertButton = view.findViewById(R.id.youtubeConvertBtn);
         downloadButton = view.findViewById(R.id.youtubeDownloadBtn);
+        user = view.findViewById(R.id.youtubeUser);
+        blurView = view.findViewById(R.id.youtubeBlur);
+        blurTarget = view.findViewById(R.id.youtubeBlurTarget);
+        ytMenuButton = view.findViewById(R.id.youtubeMenuBtn);
+        goBackButton = view.findViewById(R.id.youtubeBackButton);
+        logOutButton = view.findViewById(R.id.youtubeLogOutButton);
+        infoButton = view.findViewById(R.id.youtubeInfoButton);
+        user = view.findViewById(R.id.youtubeUser);
+
+        tokenCheck();
+        enableBackUI(true); // quick reset
 
         downloadButton.setVisibility(INVISIBLE);
         downloadButton.setClickable(false);
@@ -113,12 +146,16 @@ public class YoutubeFragment extends Fragment {
             convertButton.setClickable(false);
             startConverting();
         });
+
+        ytMenuButton.setOnClickListener(v -> {
+            blurBackground();
+        });
+
         return view;
     }
 
     private void startConverting() {
         String resolution = "";
-
         String ytURL = inputURL.getText().toString();
         String mediaType = spinnerType.getSelectedItem().toString();
         JSONObject json = new JSONObject();
@@ -300,6 +337,108 @@ public class YoutubeFragment extends Fragment {
                 inputURL.setText("");
             });
         }).start();
+    }
+
+
+    private void blurBackground() {
+        float radius = 20f;
+        Drawable windowBackground = requireActivity().getWindow().getDecorView().getBackground();
+
+        blurView.setupWith(blurTarget).setFrameClearDrawable(windowBackground).setBlurRadius(radius);
+
+        blurView.setVisibility(VISIBLE);
+        blurView.setAlpha(0f);
+        blurView.animate().alpha(1f).setDuration(400).start();
+
+        enableBackUI(false);
+
+        goBackButton.setOnClickListener(v -> {
+            blurView.setAlpha(1f);
+            blurView.animate().alpha(0f).setDuration(400).start();
+            blurView.setVisibility(GONE);
+            enableBackUI(true);
+
+        });
+
+        logOutButton.setOnClickListener(v -> {
+            PreferencesClass.clearToken(requireContext());
+            PreferencesClass.clearUser(requireContext());
+
+            Intent intent = new Intent(requireActivity(), LoginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+
+            startActivity(intent);
+            requireActivity().finish();
+
+        });
+
+        infoButton.setOnClickListener(v -> {
+            requireActivity().runOnUiThread(() -> {
+                Toast.makeText(requireContext(), "Boomshakalaka", Toast.LENGTH_SHORT).show();
+            });
+        });
+
+    }
+
+    private void enableBackUI(boolean flag) {
+        inputURL.setEnabled(flag);
+        spinnerRes.setEnabled(flag);
+        spinnerType.setEnabled(flag);
+        convertButton.setEnabled(flag);
+        downloadButton.setEnabled(flag);
+        ytMenuButton.setEnabled(flag);
+
+    }
+
+    private void tokenCheck() {
+        String savedToken = PreferencesClass.getToken(requireContext());
+        if (savedToken == null) {
+            redirectToLoginOnce();
+            return;
+        }
+
+        String url = PreferencesClass.getServer(requireContext()) + "/api/user_info";
+        Log.d("userDebug", "Checking token");
+
+        Request request = new Request.Builder()
+                .url(url)
+                .get()
+                .addHeader("Authorization", "Bearer " + savedToken)
+                .build();
+
+        new Thread(() -> {
+            try {
+                Response response = client.newCall(request).execute();
+                Log.d("userDebug", "Response: " + response);
+
+                if (response.code() == 200) {
+                    requireActivity().runOnUiThread(() -> {
+                        if (isAdded()) {
+                            user.setText(PreferencesClass.getUser(requireContext()));
+                            Log.d("UserDebug", "User updated to: " + PreferencesClass.getUser(requireContext()));
+                        }
+                    });
+                } else {
+                    redirectToLoginOnce();
+                }
+            } catch (Exception exception) {
+                exception.printStackTrace();
+                redirectToLoginOnce();
+            }
+        }).start();
+    }
+
+    private void redirectToLoginOnce() {
+        if (alreadyRedirected) return;
+        alreadyRedirected = true;
+
+        requireActivity().runOnUiThread(() -> {
+            Toast.makeText(requireContext(), "Session expired!", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(requireActivity(), LoginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            requireActivity().finish();
+        });
     }
 }
 
