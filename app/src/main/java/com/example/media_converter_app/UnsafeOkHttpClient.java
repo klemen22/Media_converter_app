@@ -2,6 +2,7 @@ package com.example.media_converter_app;
 
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
+import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
@@ -39,7 +40,12 @@ public class UnsafeOkHttpClient {
 
             final SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
 
-            OkHttpClient.Builder builder = new OkHttpClient.Builder();
+            OkHttpClient.Builder builder = new OkHttpClient
+                    .Builder()
+                    .connectTimeout(60, TimeUnit.SECONDS)
+                    .readTimeout(300, TimeUnit.SECONDS)
+                    .writeTimeout(300, TimeUnit.SECONDS);
+
             builder.sslSocketFactory(sslSocketFactory, (X509TrustManager) trustAllCerts[0]);
 
             builder.hostnameVerifier(new HostnameVerifier() {

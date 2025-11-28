@@ -4,6 +4,9 @@ import static android.view.View.GONE;
 import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
 
+import static androidx.core.content.ContentProviderCompat.requireContext;
+import static androidx.core.content.ContextCompat.startActivity;
+
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -23,6 +26,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.media_converter_app.LoginActivity;
 import com.example.media_converter_app.NotificationClass;
@@ -35,6 +39,7 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.util.Arrays;
 
 import eightbitlab.com.blurview.BlurTarget;
 import eightbitlab.com.blurview.BlurView;
@@ -64,10 +69,17 @@ public class YoutubeFragment extends Fragment {
 
     private LinearLayout ytMenuButton;
 
+    private ImageView ytConnectionButton;
+
+    private LinearLayout ytBlurMenu;
+    private LinearLayout ytBlurConnection;
+
+    private ImageView ytBlurBackButton;
+    private ImageView ytBlurRetryButton;
+    private Spinner ytBlurServerSpinner;
+
+    String[] availableServers = {"https://192.168.64.95:9999", "https://100.104.214.108:9999"};
     private final OkHttpClient client = UnsafeOkHttpClient.getUnsafeClient();
-
-    private final String baseAddr = "https://192.168.64.95:9999/api"; // default value
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstance) {
@@ -85,9 +97,16 @@ public class YoutubeFragment extends Fragment {
         goBackButton = view.findViewById(R.id.youtubeBackButton);
         logOutButton = view.findViewById(R.id.youtubeLogOutButton);
         infoButton = view.findViewById(R.id.youtubeInfoButton);
-        user = view.findViewById(R.id.youtubeUser);
+        ytConnectionButton = view.findViewById(R.id.youtubeConnectionButton);
+        ytBlurMenu = view.findViewById(R.id.youtubeBlurMenu);
+        ytBlurConnection = view.findViewById(R.id.youtubeBlurConnection);
+        ytBlurServerSpinner = view.findViewById(R.id.youtubeBlurServerSelect);
+        ytBlurBackButton = view.findViewById(R.id.youtubeBlurBack);
+        ytBlurRetryButton = view.findViewById(R.id.youtubeBlurRetry);
+
 
         tokenCheck();
+        checkConnection(PreferencesClass.getServer(requireContext()));
         enableBackUI(true); // quick reset
 
         downloadButton.setVisibility(INVISIBLE);
@@ -104,10 +123,10 @@ public class YoutubeFragment extends Fragment {
         String[] mediaType = {"mp3", "mp4"};
         ArrayAdapter<String> adapter1 = new ArrayAdapter<>(
                 requireContext(),
-                android.R.layout.simple_spinner_item,
+                R.layout.spinner_selected_item,
                 mediaType
         );
-        adapter1.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        adapter1.setDropDownViewResource(R.layout.spinner_dropdown_item);
         spinnerType.setAdapter(adapter1);
 
 
@@ -115,10 +134,10 @@ public class YoutubeFragment extends Fragment {
         String[] mediaRes = {"144p", "480p", "720p", "1080p"};
         ArrayAdapter<String> adapter2 = new ArrayAdapter<>(
                 requireContext(),
-                android.R.layout.simple_spinner_item,
+                R.layout.spinner_selected_item,
                 mediaRes
         );
-        adapter2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        adapter2.setDropDownViewResource(R.layout.spinner_dropdown_item);
         spinnerRes.setAdapter(adapter2);
 
         spinnerType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -151,6 +170,10 @@ public class YoutubeFragment extends Fragment {
             blurBackground();
         });
 
+        ytConnectionButton.setOnClickListener(v->{
+            blurBackgroundConnection();
+        });
+
         return view;
     }
 
@@ -179,7 +202,11 @@ public class YoutubeFragment extends Fragment {
         }
 
         RequestBody payloadBody = RequestBody.create(json.toString(), MediaType.parse("application/json; charset=utf-8"));
-        Request payload = new Request.Builder().url(baseAddr + "/youtube/convert").post(payloadBody).build();
+        Request payload = new Request.Builder().url(PreferencesClass.getServer(requireContext()) + "/api/youtube/convert")
+                .addHeader("Content-Type", "application/json")
+                .addHeader("Authorization", "Bearer " + PreferencesClass.getToken(requireContext()))
+                .post(payloadBody)
+                .build();
 
         new Thread(() -> {
             try {
@@ -250,7 +277,7 @@ public class YoutubeFragment extends Fragment {
                 RequestBody.create(json.toString(), MediaType.parse("application/json; charset=utf-8"));
 
         Request payload = new Request.Builder()
-                .url(baseAddr + "/youtube/download")
+                .url(PreferencesClass.getServer(requireContext()) + "/api/youtube/download")
                 .post(payloadBody)
                 .build();
 
@@ -316,7 +343,7 @@ public class YoutubeFragment extends Fragment {
                 RequestBody.create(json.toString(), MediaType.parse("application/json; charset=utf-8"));
 
         Request payload = new Request.Builder()
-                .url(baseAddr + "/youtube/delete")
+                .url(PreferencesClass.getServer(requireContext()) + "/api/youtube/delete")
                 .delete(payloadBody)
                 .build();
 
@@ -339,13 +366,45 @@ public class YoutubeFragment extends Fragment {
         }).start();
     }
 
+    private void blurBackgroundConnection(){
+        float radius = 20f;
+        Drawable windowBackground = requireActivity().getWindow().getDecorView().getBackground();
+
+        blurView.setupWith(blurTarget).setFrameClearDrawable(windowBackground).setBlurRadius(radius);
+        ytBlurConnection.setVisibility(VISIBLE);
+        blurView.setVisibility(VISIBLE);
+        blurView.setAlpha(0f);
+        blurView.animate().alpha(1f).setDuration(400).start();
+
+        enableBackUI(false);
+
+        ArrayAdapter<String> serverAdapter = new ArrayAdapter<>(requireContext(), R.layout.spinner_selected_item, availableServers);
+        serverAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        ytBlurServerSpinner.setAdapter(serverAdapter);
+        int currentIndex = Arrays.stream(availableServers).toList().indexOf(PreferencesClass.getServer(requireContext()));
+        ytBlurServerSpinner.setSelection(currentIndex);
+
+        ytBlurBackButton.setOnClickListener(v->{
+            blurView.setAlpha(1f);
+            blurView.animate().alpha(0f).setDuration(400).start();
+            blurView.setVisibility(GONE);
+            ytBlurConnection.setVisibility(GONE);
+            enableBackUI(true);
+        });
+
+        ytBlurRetryButton.setOnClickListener(v->{
+            String selectedServer = ytBlurServerSpinner.getSelectedItem().toString();
+            checkConnection(selectedServer);
+        });
+    }
+
 
     private void blurBackground() {
         float radius = 20f;
         Drawable windowBackground = requireActivity().getWindow().getDecorView().getBackground();
 
         blurView.setupWith(blurTarget).setFrameClearDrawable(windowBackground).setBlurRadius(radius);
-
+        ytBlurMenu.setVisibility(VISIBLE);
         blurView.setVisibility(VISIBLE);
         blurView.setAlpha(0f);
         blurView.animate().alpha(1f).setDuration(400).start();
@@ -356,6 +415,7 @@ public class YoutubeFragment extends Fragment {
             blurView.setAlpha(1f);
             blurView.animate().alpha(0f).setDuration(400).start();
             blurView.setVisibility(GONE);
+            ytBlurMenu.setVisibility(GONE);
             enableBackUI(true);
 
         });
@@ -387,8 +447,9 @@ public class YoutubeFragment extends Fragment {
         convertButton.setEnabled(flag);
         downloadButton.setEnabled(flag);
         ytMenuButton.setEnabled(flag);
-
+        ytConnectionButton.setEnabled(flag);
     }
+
 
     private void tokenCheck() {
         String savedToken = PreferencesClass.getToken(requireContext());
@@ -422,11 +483,15 @@ public class YoutubeFragment extends Fragment {
                     redirectToLoginOnce();
                 }
             } catch (Exception exception) {
+                requireActivity().runOnUiThread(()->{
+                    user.setText("User");
+                });
                 exception.printStackTrace();
                 redirectToLoginOnce();
             }
         }).start();
     }
+
 
     private void redirectToLoginOnce() {
         if (alreadyRedirected) return;
@@ -439,6 +504,33 @@ public class YoutubeFragment extends Fragment {
             startActivity(intent);
             requireActivity().finish();
         });
+    }
+
+    private void checkConnection(String address) {
+        String url = address + "/api/ping";
+        Request request = new Request.Builder().url(url).get().build();
+
+        new Thread(() -> {
+            try {
+                Response response = client.newCall(request).execute();
+                if (response.code() == 200) {
+                    requireActivity().runOnUiThread(() -> {
+                        Toast.makeText(requireContext(), "Connected!", Toast.LENGTH_SHORT).show();
+                        PreferencesClass.setServer(requireContext(), address);
+                        ytConnectionButton.setImageResource(R.drawable.link_100);
+                    });
+                } else {
+                    requireActivity().runOnUiThread(()->{
+                        Toast.makeText(requireContext(), "Error while trying to connect!", Toast.LENGTH_SHORT).show();
+                        ytConnectionButton.setImageResource(R.drawable.broken_link_100);
+                    });
+
+                }
+            } catch (Exception exception) {
+                exception.printStackTrace();
+            }
+        }).start();
+
     }
 }
 

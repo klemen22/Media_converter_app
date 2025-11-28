@@ -3,6 +3,7 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
-
-    <color name="overlay">#AA000000</color>
+    <color name="gray_primary">#375a7f</color>
+    <color name="gray_secondary">#444</color>
+    <color name="dark_gray">#303030</color>
 </resources>

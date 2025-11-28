@@ -6,75 +6,126 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".LoginActivity"
-    android:padding="20dp">
+    android:background="@color/dark_gray">
 
-    <LinearLayout
-        android:id="@+id/connectionContainer"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:padding="4dp"
-        android:gravity="end">
+    <eightbitlab.com.blurview.BlurTarget
+        android:id="@+id/loginBlurTarget"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="20dp">
 
-        <Spinner
-            android:id="@+id/loginServerSelect"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:spinnerMode="dialog"
-            android:gravity="center"
-            android:layout_gravity="center"
-            android:layout_marginEnd="10dp" />
-
-        <ImageView
-            android:id="@+id/loginConnectionStatus"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:src="@drawable/broken_link_100" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/connectionContainer"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        android:gravity="center"
-        android:layout_marginBottom="300dp"
-        android:orientation="vertical">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Media Converter"
-            android:layout_marginBottom="20dp"
-            android:textSize="30sp" />
-
-        <EditText
-            android:id="@+id/loginUsername"
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Username..." />
+            android:layout_height="match_parent">
 
-        <EditText
-            android:id="@+id/loginPassword"
+            <LinearLayout
+                android:id="@+id/connectionContainer"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:padding="4dp"
+                android:gravity="end">
+
+                <ImageView
+                    android:id="@+id/loginConnectionStatus"
+                    android:clickable="true"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:src="@drawable/broken_link_100" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toBottomOf="@id/connectionContainer"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:gravity="center"
+                android:layout_marginBottom="300dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Media Converter"
+                    android:layout_marginBottom="20dp"
+                    android:textColor="@color/white"
+                    android:textSize="30sp" />
+
+                <EditText
+                    android:id="@+id/loginUsername"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColorHint="@color/white"
+                    android:textColor="@color/white"
+                    android:hint="Username..." />
+
+                <EditText
+                    android:id="@+id/loginPassword"
+                    android:textColor="@color/white"
+                    android:textColorHint="@color/white"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:hint="Password..."
+                    android:password="true" />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/loginBtn"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="40dp"
+                android:text="Login"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:layout_marginBottom="20dp" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </eightbitlab.com.blurview.BlurTarget>
+
+    <eightbitlab.com.blurview.BlurView
+        android:id="@+id/loginBlur"
+        android:background="@color/dark_gray"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone">
+
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:hint="Password..."
-            android:password="true" />
-    </LinearLayout>
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:gravity="center">
 
-    <Button
-        android:id="@+id/loginBtn"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="40dp"
-        android:text="Login"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        android:layout_marginBottom="20dp" />
+            <Spinner
+                android:id="@+id/loginServerSelect"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="5dp"
+                android:spinnerMode="dialog"
+                android:gravity="center"
+                android:layout_gravity="center"
+                android:layout_marginEnd="10dp"
+                android:layout_marginBottom="20dp"/>
+
+            <ImageView
+                android:id="@+id/loginRetry"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_marginBottom="20dp"
+                android:src="@drawable/retry_50"/>
+
+            <ImageView
+                android:id="@+id/loginBack"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:src="@drawable/back_arrow_50"/>
+
+        </LinearLayout>
+
+    </eightbitlab.com.blurview.BlurView>
 </androidx.constraintlayout.widget.ConstraintLayout>

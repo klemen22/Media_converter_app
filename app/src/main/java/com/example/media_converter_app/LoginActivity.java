@@ -1,10 +1,15 @@
 package com.example.media_converter_app;
 
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
+
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowInsets;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -16,6 +21,12 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import org.json.JSONObject;
 
+import java.security.cert.CertPathBuilderSpi;
+import java.util.Arrays;
+import java.util.concurrent.ExecutionException;
+
+import eightbitlab.com.blurview.BlurTarget;
+import eightbitlab.com.blurview.BlurView;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -29,6 +40,12 @@ public class LoginActivity extends AppCompatActivity {
     private Button loginBtn;
     private ImageView loginConnectionStatus;
     private Spinner loginServerSelect;
+
+    private BlurView loginBlurView;
+    private BlurTarget loginBlurTarget;
+
+    private ImageView loginRetryBtn;
+    private ImageView loginBackBtn;
 
     String[] availableServers = {"https://192.168.64.95:9999", "https://100.104.214.108:9999"};
 
@@ -64,16 +81,25 @@ public class LoginActivity extends AppCompatActivity {
         loginBtn = findViewById(R.id.loginBtn);
         loginConnectionStatus = findViewById(R.id.loginConnectionStatus);
         loginServerSelect = findViewById(R.id.loginServerSelect);
+        loginBlurView = findViewById(R.id.loginBlur);
+        loginBlurTarget = findViewById(R.id.loginBlurTarget);
+        loginRetryBtn = findViewById(R.id.loginRetry);
+        loginBackBtn = findViewById(R.id.loginBack);
+
+        // check connection to server
+        checkConnection(PreferencesClass.getServer(this));
+
+        // quick reset
+        enableUI(true);
 
         loginBtn.setOnClickListener(v -> {
             Log.d("LoginDebug", "Login button was pressed");
             Login();
         });
 
-        //ArrayAdapter<String> serverAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, availableServers);
-        //serverAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        //loginServerSelect.setAdapter(serverAdapter);
-
+        loginConnectionStatus.setOnClickListener(v->{
+            blurBackground();
+        });
     }
 
 
@@ -184,4 +210,70 @@ public class LoginActivity extends AppCompatActivity {
         }).start();
 
     }
+
+    private void blurBackground(){
+        float radius = 20f;
+        Drawable windowBackground = getWindow().getDecorView().getBackground();
+
+        loginBlurView.setupWith(loginBlurTarget).setFrameClearDrawable(windowBackground);
+        loginBlurView.setVisibility(VISIBLE);
+        loginBlurView.setAlpha(0f);
+        loginBlurView.animate().alpha(1f).setDuration(400).start();
+
+        enableUI(false);
+
+        ArrayAdapter<String> serverAdapter = new ArrayAdapter<>(this, R.layout.spinner_selected_item, availableServers);
+        serverAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        loginServerSelect.setAdapter(serverAdapter);
+        int currentIndex = Arrays.stream(availableServers).toList().indexOf(PreferencesClass.getServer(this));
+        loginServerSelect.setSelection(currentIndex);
+
+        loginRetryBtn.setOnClickListener(v->{
+            String selectedServer = loginServerSelect.getSelectedItem().toString();
+            checkConnection(selectedServer);
+        });
+
+        loginBackBtn.setOnClickListener(v->{
+            loginBlurView.setAlpha(1f);
+            loginBlurView.animate().alpha(0f).setDuration(400).start();
+            loginBlurView.setVisibility(GONE);
+            enableUI(true);
+        });
+    }
+
+    private void checkConnection(String address){
+        String url = address + "/api/ping";
+        Request request = new Request.Builder().url(url).get().build();
+
+        new Thread(()->{
+            try{
+                Response response = client.newCall(request).execute();
+                if(response.code() == 200){
+                    runOnUiThread(()->{
+                        Toast.makeText(this, "Connected!", Toast.LENGTH_SHORT).show();
+                        PreferencesClass.setServer(this, address);
+                        loginConnectionStatus.setImageResource(R.drawable.link_100);
+                    });
+                }
+                else{
+                    runOnUiThread(()->{
+                        Toast.makeText(this, "Error while trying to connect!", Toast.LENGTH_SHORT).show();
+                        loginConnectionStatus.setImageResource(R.drawable.link_100);
+                    });
+                }
+            } catch (Exception exception){
+                exception.printStackTrace();
+            }
+        }).start();
+
+    }
+
+    private void enableUI(boolean flag){
+        loginUsername.setEnabled(flag);
+        loginPassword.setEnabled(flag);
+        loginBtn.setEnabled(flag);
+        loginConnectionStatus.setEnabled(flag);
+    }
+
+
 }
