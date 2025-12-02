@@ -90,6 +90,7 @@ public class YoutubeFragment extends Fragment {
         spinnerRes = view.findViewById(R.id.youtubeDropDownResolution);
         convertButton = view.findViewById(R.id.youtubeConvertBtn);
         downloadButton = view.findViewById(R.id.youtubeDownloadBtn);
+
         user = view.findViewById(R.id.youtubeUser);
         blurView = view.findViewById(R.id.youtubeBlur);
         blurTarget = view.findViewById(R.id.youtubeBlurTarget);
@@ -97,6 +98,7 @@ public class YoutubeFragment extends Fragment {
         goBackButton = view.findViewById(R.id.youtubeBackButton);
         logOutButton = view.findViewById(R.id.youtubeLogOutButton);
         infoButton = view.findViewById(R.id.youtubeInfoButton);
+
         ytConnectionButton = view.findViewById(R.id.youtubeConnectionButton);
         ytBlurMenu = view.findViewById(R.id.youtubeBlurMenu);
         ytBlurConnection = view.findViewById(R.id.youtubeBlurConnection);

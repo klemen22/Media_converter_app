@@ -3,6 +3,7 @@ package com.example.media_converter_app.fragments;
 import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
 
+import android.media.Image;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
@@ -12,7 +13,10 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
@@ -27,6 +31,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 
+import eightbitlab.com.blurview.BlurTarget;
+import eightbitlab.com.blurview.BlurView;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -42,6 +48,26 @@ public class InstagramFragment extends Fragment {
     private Button convertButton;
     private Button downloadButton;
 
+    private boolean alreadyRedirected = false;
+
+    private ImageView instaBlurMenuBackButton;
+    private ImageView instaBlurMenuLogOutButton;
+    private ImageView instaBlurMenuInfoButton;
+
+    private BlurView blurView;
+    private BlurTarget blurTarget;
+    private TextView instaUser;
+
+    private LinearLayout instaMenuButton;
+    private ImageView instaConnectionButton;
+
+    private LinearLayout instaBlurMenu;
+    private LinearLayout instaBlurConnection;
+
+    private ImageView instaConnectionBackButton;
+    private ImageView instaConnectionRetryButton;
+    private Spinner instaConnectionServerSpinner;
+    String[] availableServers = {"https://192.168.64.95:9999","https://100.104.214.108:9999"};
     private final OkHttpClient client = UnsafeOkHttpClient.getUnsafeClient();
 
 
@@ -54,6 +80,14 @@ public class InstagramFragment extends Fragment {
         spinnerType = view.findViewById(R.id.instagramDropDownType);
         convertButton = view.findViewById(R.id.instagramConvertBtn);
         downloadButton = view.findViewById(R.id.instagramDownloadBtn);
+
+        instaUser = view.findViewById(R.id.instagramUser);
+        blurView = view.findViewById(R.id.instagramBlur);
+        blurTarget = view.findViewById(R.id.instagramBlurTarget);
+        instaBlurMenu = view.findViewById(R.id.instagramBlurMenu);
+        instaBlurMenuBackButton = view.findViewById(R.id.instagramBackButton);
+        instaBlurMenuLogOutButton = view.findViewById(R.id.instagramLogOutButton);
+        instaBlurMenuInfoButton = view.findViewById(R.id.instagramInfoButton);
 
         downloadButton.setVisibility(INVISIBLE);
         downloadButton.setClickable(false);
