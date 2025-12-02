@@ -4,6 +4,7 @@
     android:layout_height="match_parent"
     android:background="@color/dark_gray"
     xmlns:app="http://schemas.android.com/apk/res-auto">
+
     <eightbitlab.com.blurview.BlurTarget
         android:id="@+id/instagramBlurTarget"
         android:layout_width="match_parent"

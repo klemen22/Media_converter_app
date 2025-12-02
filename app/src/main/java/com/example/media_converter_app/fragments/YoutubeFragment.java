@@ -338,8 +338,7 @@ public class YoutubeFragment extends Fragment {
 
         try {
             json.put("filename", filename);
-        } catch (Exception ignored) {
-        }
+        } catch (Exception ignored) {}
 
         RequestBody payloadBody =
                 RequestBody.create(json.toString(), MediaType.parse("application/json; charset=utf-8"));
