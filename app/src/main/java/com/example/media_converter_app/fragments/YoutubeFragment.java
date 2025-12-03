@@ -4,9 +4,6 @@ import static android.view.View.GONE;
 import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
 
-import static androidx.core.content.ContentProviderCompat.requireContext;
-import static androidx.core.content.ContextCompat.startActivity;
-
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -26,7 +23,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.media_converter_app.LoginActivity;
 import com.example.media_converter_app.NotificationClass;
@@ -51,35 +47,27 @@ import okhttp3.Response;
 
 public class YoutubeFragment extends Fragment {
 
+    private final OkHttpClient client = UnsafeOkHttpClient.getUnsafeClient();
+    String[] availableServers = {"https://192.168.64.95:9999", "https://100.104.214.108:9999"};
     private EditText inputURL;
     private Spinner spinnerType;
     private Spinner spinnerRes;
-
     private Button convertButton;
     private Button downloadButton;
     private boolean alreadyRedirected = false;
-
     private ImageView goBackButton;
     private ImageView logOutButton;
     private ImageView infoButton;
-
     private BlurView blurView;
     private BlurTarget blurTarget;
     private TextView user;
-
     private LinearLayout ytMenuButton;
-
     private ImageView ytConnectionButton;
-
     private LinearLayout ytBlurMenu;
     private LinearLayout ytBlurConnection;
-
     private ImageView ytBlurBackButton;
     private ImageView ytBlurRetryButton;
     private Spinner ytBlurServerSpinner;
-
-    String[] availableServers = {"https://192.168.64.95:9999", "https://100.104.214.108:9999"};
-    private final OkHttpClient client = UnsafeOkHttpClient.getUnsafeClient();
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstance) {
@@ -172,7 +160,7 @@ public class YoutubeFragment extends Fragment {
             blurBackground();
         });
 
-        ytConnectionButton.setOnClickListener(v->{
+        ytConnectionButton.setOnClickListener(v -> {
             blurBackgroundConnection();
         });
 
@@ -338,7 +326,8 @@ public class YoutubeFragment extends Fragment {
 
         try {
             json.put("filename", filename);
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
 
         RequestBody payloadBody =
                 RequestBody.create(json.toString(), MediaType.parse("application/json; charset=utf-8"));
@@ -367,7 +356,7 @@ public class YoutubeFragment extends Fragment {
         }).start();
     }
 
-    private void blurBackgroundConnection(){
+    private void blurBackgroundConnection() {
         float radius = 20f;
         Drawable windowBackground = requireActivity().getWindow().getDecorView().getBackground();
 
@@ -385,7 +374,7 @@ public class YoutubeFragment extends Fragment {
         int currentIndex = Arrays.stream(availableServers).toList().indexOf(PreferencesClass.getServer(requireContext()));
         ytBlurServerSpinner.setSelection(currentIndex);
 
-        ytBlurBackButton.setOnClickListener(v->{
+        ytBlurBackButton.setOnClickListener(v -> {
             blurView.setAlpha(1f);
             blurView.animate().alpha(0f).setDuration(400).start();
             blurView.setVisibility(GONE);
@@ -393,7 +382,7 @@ public class YoutubeFragment extends Fragment {
             enableBackUI(true);
         });
 
-        ytBlurRetryButton.setOnClickListener(v->{
+        ytBlurRetryButton.setOnClickListener(v -> {
             String selectedServer = ytBlurServerSpinner.getSelectedItem().toString();
             checkConnection(selectedServer);
         });
@@ -484,7 +473,7 @@ public class YoutubeFragment extends Fragment {
                     redirectToLoginOnce();
                 }
             } catch (Exception exception) {
-                requireActivity().runOnUiThread(()->{
+                requireActivity().runOnUiThread(() -> {
                     user.setText("User");
                 });
                 exception.printStackTrace();
@@ -521,7 +510,7 @@ public class YoutubeFragment extends Fragment {
                         ytConnectionButton.setImageResource(R.drawable.link_100);
                     });
                 } else {
-                    requireActivity().runOnUiThread(()->{
+                    requireActivity().runOnUiThread(() -> {
                         Toast.makeText(requireContext(), "Error while trying to connect!", Toast.LENGTH_SHORT).show();
                         ytConnectionButton.setImageResource(R.drawable.broken_link_100);
                     });

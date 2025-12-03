@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/dark_gray"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    android:background="@color/dark_gray">
 
     <eightbitlab.com.blurview.BlurTarget
         android:id="@+id/instagramBlurTarget"
@@ -20,19 +20,19 @@
                 android:id="@+id/topContainer"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                app:layout_constraintStart_toStartOf="parent"
+                android:padding="4dp"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                android:padding="4dp">
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
 
                 <LinearLayout
                     android:id="@+id/instagramMenuBtn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    app:layout_constraintTop_toTopOf="parent"
+                    android:clickable="true"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    android:clickable="true">
+                    app:layout_constraintTop_toTopOf="parent">
 
                     <ImageView
                         android:layout_width="40dp"
@@ -43,10 +43,10 @@
                         android:id="@+id/instagramUser"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textColor="@color/white"
-                        android:text="User"
                         android:layout_gravity="center"
                         android:layout_marginStart="10dp"
+                        android:text="User"
+                        android:textColor="@color/white"
                         android:textSize="18sp" />
 
                 </LinearLayout>
@@ -56,28 +56,28 @@
                     android:layout_width="30dp"
                     android:layout_height="30dp"
                     android:src="@drawable/broken_link_100"
+                    app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent" />
+                    app:layout_constraintTop_toTopOf="parent" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="0dp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/topContainer"
-                app:layout_constraintBottom_toBottomOf="parent"
-                android:orientation="vertical"
+                android:layout_marginBottom="300dp"
                 android:gravity="center"
-                android:layout_marginBottom="300dp">
+                android:orientation="vertical"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/topContainer">
 
                 <TextView
                     android:id="@+id/instagramTitle"
                     android:layout_width="wrap_content"
-                    android:textColor="@color/white"
                     android:layout_height="wrap_content"
                     android:text="Instagram Converter"
+                    android:textColor="@color/white"
                     android:textSize="30sp" />
 
                 <EditText
@@ -85,9 +85,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="40dp"
                     android:layout_marginTop="20dp"
+                    android:hint="Enter Instagram URL..."
                     android:textColor="@color/white"
-                    android:textColorHint="@color/white"
-                    android:hint="Enter Instagram URL..."/>
+                    android:textColorHint="@color/white" />
 
                 <LinearLayout
                     android:id="@+id/instagramSpinnerContainer"
@@ -98,8 +98,8 @@
 
                     <Spinner
                         android:id="@+id/instagramDropDownType"
-                        android:layout_height="wrap_content"
-                        android:layout_width="wrap_content"/>
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
                 </LinearLayout>
             </LinearLayout>
 
@@ -107,30 +107,31 @@
                 android:id="@+id/instagramConvertBtn"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="Convert"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
                 android:layout_marginBottom="20dp"
+                android:clickable="true"
                 android:padding="14dp"
+                android:text="Convert"
                 android:visibility="visible"
-                android:clickable="true" />
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
 
             <Button
                 android:id="@+id/instagramDownloadBtn"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="Download"
-                app:layout_constraintBottom_toBottomOf="parent"
                 android:layout_marginBottom="20dp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
+                android:clickable="false"
                 android:padding="14dp"
+                android:text="Download"
                 android:visibility="invisible"
-                android:clickable="false" />
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </eightbitlab.com.blurview.BlurTarget>
+
     <eightbitlab.com.blurview.BlurView
         android:id="@+id/instagramBlur"
         android:layout_width="match_parent"
@@ -139,71 +140,71 @@
 
         <LinearLayout
             android:id="@+id/instagramBlurMenu"
-            android:background="@color/dark_gray"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical"
+            android:background="@color/dark_gray"
             android:gravity="center"
+            android:orientation="vertical"
             android:visibility="gone">
 
             <ImageView
                 android:id="@+id/instagramBackButton"
-                android:clickable="true"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:src="@drawable/back_arrow_50"
-                android:layout_marginBottom="20dp" />
-
-            <ImageView
-                android:id="@+id/instagramLogOutButton"
-                android:clickable="true"
-                android:layout_marginStart="5dp"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:layout_marginBottom="20dp"
+                android:clickable="true"
+                android:src="@drawable/back_arrow_50" />
+
+            <ImageView
+                android:id="@+id/instagramLogOutButton"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_marginStart="5dp"
+                android:layout_marginBottom="20dp"
+                android:clickable="true"
                 android:src="@drawable/logout_50" />
 
             <ImageView
                 android:id="@+id/instagramInfoButton"
-                android:clickable="true"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
+                android:clickable="true"
                 android:src="@drawable/info_50" />
 
         </LinearLayout>
 
         <LinearLayout
             android:id="@+id/instagramBlurConnection"
-            android:gravity="center"
-            android:background="@color/dark_gray"
-            android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:background="@color/dark_gray"
+            android:gravity="center"
+            android:orientation="vertical"
             android:visibility="gone">
 
             <Spinner
                 android:id="@+id/instagramBlurServerSelect"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="5dp"
-                android:spinnerMode="dialog"
-                android:gravity="center"
                 android:layout_gravity="center"
+                android:layout_marginStart="5dp"
                 android:layout_marginEnd="10dp"
-                android:layout_marginBottom="20dp"/>
+                android:layout_marginBottom="20dp"
+                android:gravity="center"
+                android:spinnerMode="dialog" />
 
             <ImageView
                 android:id="@+id/instagramBlurRetry"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:layout_marginBottom="20dp"
-                android:src="@drawable/retry_50"/>
+                android:src="@drawable/retry_50" />
 
             <ImageView
                 android:id="@+id/instagramBlurBack"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
-                android:src="@drawable/back_arrow_50"/>
+                android:src="@drawable/back_arrow_50" />
 
         </LinearLayout>
     </eightbitlab.com.blurview.BlurView>

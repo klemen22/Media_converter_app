@@ -21,9 +21,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import org.json.JSONObject;
 
-import java.security.cert.CertPathBuilderSpi;
 import java.util.Arrays;
-import java.util.concurrent.ExecutionException;
 
 import eightbitlab.com.blurview.BlurTarget;
 import eightbitlab.com.blurview.BlurView;
@@ -35,23 +33,18 @@ import okhttp3.Response;
 
 public class LoginActivity extends AppCompatActivity {
 
+    public static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
+    String[] availableServers = {"https://192.168.64.95:9999", "https://100.104.214.108:9999"};
+    OkHttpClient client = UnsafeOkHttpClient.getUnsafeClient();
     private EditText loginUsername;
     private EditText loginPassword;
     private Button loginBtn;
     private ImageView loginConnectionStatus;
     private Spinner loginServerSelect;
-
     private BlurView loginBlurView;
     private BlurTarget loginBlurTarget;
-
     private ImageView loginRetryBtn;
     private ImageView loginBackBtn;
-
-    String[] availableServers = {"https://192.168.64.95:9999", "https://100.104.214.108:9999"};
-
-    OkHttpClient client = UnsafeOkHttpClient.getUnsafeClient();
-
-    public static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,7 +90,7 @@ public class LoginActivity extends AppCompatActivity {
             Login();
         });
 
-        loginConnectionStatus.setOnClickListener(v->{
+        loginConnectionStatus.setOnClickListener(v -> {
             blurBackground();
         });
     }
@@ -139,7 +132,6 @@ public class LoginActivity extends AppCompatActivity {
                     runOnUiThread(() -> {
                         Toast.makeText(this, "Session expired!", Toast.LENGTH_SHORT).show();
                     });
-                    return;
                 }
 
             } catch (Exception exception) {
@@ -197,7 +189,6 @@ public class LoginActivity extends AppCompatActivity {
 
                     runOnUiThread(() -> {
                         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
-                        return;
                     });
                 }
 
@@ -211,7 +202,7 @@ public class LoginActivity extends AppCompatActivity {
 
     }
 
-    private void blurBackground(){
+    private void blurBackground() {
         float radius = 20f;
         Drawable windowBackground = getWindow().getDecorView().getBackground();
 
@@ -228,12 +219,12 @@ public class LoginActivity extends AppCompatActivity {
         int currentIndex = Arrays.stream(availableServers).toList().indexOf(PreferencesClass.getServer(this));
         loginServerSelect.setSelection(currentIndex);
 
-        loginRetryBtn.setOnClickListener(v->{
+        loginRetryBtn.setOnClickListener(v -> {
             String selectedServer = loginServerSelect.getSelectedItem().toString();
             checkConnection(selectedServer);
         });
 
-        loginBackBtn.setOnClickListener(v->{
+        loginBackBtn.setOnClickListener(v -> {
             loginBlurView.setAlpha(1f);
             loginBlurView.animate().alpha(0f).setDuration(400).start();
             loginBlurView.setVisibility(GONE);
@@ -241,34 +232,33 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    private void checkConnection(String address){
+    private void checkConnection(String address) {
         String url = address + "/api/ping";
         Request request = new Request.Builder().url(url).get().build();
 
-        new Thread(()->{
-            try{
+        new Thread(() -> {
+            try {
                 Response response = client.newCall(request).execute();
-                if(response.code() == 200){
-                    runOnUiThread(()->{
+                if (response.code() == 200) {
+                    runOnUiThread(() -> {
                         Toast.makeText(this, "Connected!", Toast.LENGTH_SHORT).show();
                         PreferencesClass.setServer(this, address);
                         loginConnectionStatus.setImageResource(R.drawable.link_100);
                     });
-                }
-                else{
-                    runOnUiThread(()->{
+                } else {
+                    runOnUiThread(() -> {
                         Toast.makeText(this, "Error while trying to connect!", Toast.LENGTH_SHORT).show();
                         loginConnectionStatus.setImageResource(R.drawable.link_100);
                     });
                 }
-            } catch (Exception exception){
+            } catch (Exception exception) {
                 exception.printStackTrace();
             }
         }).start();
 
     }
 
-    private void enableUI(boolean flag){
+    private void enableUI(boolean flag) {
         loginUsername.setEnabled(flag);
         loginPassword.setEnabled(flag);
         loginBtn.setEnabled(flag);

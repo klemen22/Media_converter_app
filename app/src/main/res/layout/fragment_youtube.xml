@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/dark_gray"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    android:background="@color/dark_gray">
 
     <eightbitlab.com.blurview.BlurTarget
         android:id="@+id/youtubeBlurTarget"
@@ -20,19 +20,19 @@
                 android:id="@+id/topContainer"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                app:layout_constraintStart_toStartOf="parent"
+                android:padding="4dp"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                android:padding="4dp">
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
 
                 <LinearLayout
                     android:id="@+id/youtubeMenuBtn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    app:layout_constraintTop_toTopOf="parent"
+                    android:clickable="true"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    android:clickable="true">
+                    app:layout_constraintTop_toTopOf="parent">
 
                     <ImageView
                         android:layout_width="40dp"
@@ -43,10 +43,10 @@
                         android:id="@+id/youtubeUser"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textColor="@color/white"
-                        android:text="User"
                         android:layout_gravity="center"
                         android:layout_marginStart="10dp"
+                        android:text="User"
+                        android:textColor="@color/white"
                         android:textSize="18sp" />
 
                 </LinearLayout>
@@ -56,38 +56,38 @@
                     android:layout_width="30dp"
                     android:layout_height="30dp"
                     android:src="@drawable/broken_link_100"
+                    app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent" />
+                    app:layout_constraintTop_toTopOf="parent" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/topContainer"
-                android:orientation="vertical"
+                android:layout_marginBottom="300dp"
                 android:gravity="center"
+                android:orientation="vertical"
                 app:layout_constraintBottom_toBottomOf="parent"
-                android:layout_marginBottom="300dp">
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/topContainer">
 
                 <TextView
                     android:id="@+id/youtubeTitle"
-                    android:textColor="@color/white"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Youtube Converter"
+                    android:textColor="@color/white"
                     android:textSize="30sp" />
 
                 <EditText
                     android:id="@+id/youtubeInput"
                     android:layout_width="match_parent"
                     android:layout_height="40dp"
-                    android:textColorHint="@color/white"
-                    android:textColor="@color/white"
                     android:layout_marginTop="20dp"
-                    android:hint="Enter Youtube URL..." />
+                    android:hint="Enter Youtube URL..."
+                    android:textColor="@color/white"
+                    android:textColorHint="@color/white" />
 
                 <LinearLayout
                     android:id="@+id/youtubeSpinnerContainer"
@@ -99,15 +99,15 @@
                         android:id="@+id/youtubeDropDownType"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:textAlignment="center"
-                        android:layout_weight="1" />
+                        android:layout_weight="1"
+                        android:textAlignment="center" />
 
                     <Spinner
                         android:id="@+id/youtubeDropDownResolution"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:textAlignment="center"
-                        android:layout_weight="1" />
+                        android:layout_weight="1"
+                        android:textAlignment="center" />
                 </LinearLayout>
             </LinearLayout>
 
@@ -115,26 +115,26 @@
                 android:id="@+id/youtubeConvertBtn"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="Convert"
                 android:layout_marginBottom="20dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
                 android:padding="14dp"
-                android:visibility="visible" />
+                android:text="Convert"
+                android:visibility="visible"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
 
             <Button
                 android:id="@+id/youtubeDownloadBtn"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="Download"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
                 android:layout_marginBottom="20dp"
+                android:clickable="false"
                 android:padding="14dp"
+                android:text="Download"
                 android:visibility="invisible"
-                android:clickable="false" />
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -148,71 +148,71 @@
 
         <LinearLayout
             android:id="@+id/youtubeBlurMenu"
-            android:background="@color/dark_gray"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical"
+            android:background="@color/dark_gray"
             android:gravity="center"
+            android:orientation="vertical"
             android:visibility="gone">
 
             <ImageView
                 android:id="@+id/youtubeBackButton"
-                android:clickable="true"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:src="@drawable/back_arrow_50"
-                android:layout_marginBottom="20dp" />
-
-            <ImageView
-                android:id="@+id/youtubeLogOutButton"
-                android:clickable="true"
-                android:layout_marginStart="5dp"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:layout_marginBottom="20dp"
+                android:clickable="true"
+                android:src="@drawable/back_arrow_50" />
+
+            <ImageView
+                android:id="@+id/youtubeLogOutButton"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_marginStart="5dp"
+                android:layout_marginBottom="20dp"
+                android:clickable="true"
                 android:src="@drawable/logout_50" />
 
             <ImageView
                 android:id="@+id/youtubeInfoButton"
-                android:clickable="true"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
+                android:clickable="true"
                 android:src="@drawable/info_50" />
 
         </LinearLayout>
 
         <LinearLayout
             android:id="@+id/youtubeBlurConnection"
-            android:gravity="center"
-            android:background="@color/dark_gray"
-            android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:background="@color/dark_gray"
+            android:gravity="center"
+            android:orientation="vertical"
             android:visibility="gone">
 
             <Spinner
                 android:id="@+id/youtubeBlurServerSelect"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="5dp"
-                android:spinnerMode="dialog"
-                android:gravity="center"
                 android:layout_gravity="center"
+                android:layout_marginStart="5dp"
                 android:layout_marginEnd="10dp"
-                android:layout_marginBottom="20dp"/>
+                android:layout_marginBottom="20dp"
+                android:gravity="center"
+                android:spinnerMode="dialog" />
 
             <ImageView
                 android:id="@+id/youtubeBlurRetry"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:layout_marginBottom="20dp"
-                android:src="@drawable/retry_50"/>
+                android:src="@drawable/retry_50" />
 
             <ImageView
                 android:id="@+id/youtubeBlurBack"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
-                android:src="@drawable/back_arrow_50"/>
+                android:src="@drawable/back_arrow_50" />
 
         </LinearLayout>
     </eightbitlab.com.blurview.BlurView>

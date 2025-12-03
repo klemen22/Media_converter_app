@@ -6,7 +6,6 @@ import static android.view.View.VISIBLE;
 
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
-import android.media.Image;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
@@ -25,10 +24,10 @@ import android.widget.Toast;
 import androidx.fragment.app.Fragment;
 
 import com.example.media_converter_app.LoginActivity;
+import com.example.media_converter_app.NotificationClass;
 import com.example.media_converter_app.PreferencesClass;
 import com.example.media_converter_app.R;
 import com.example.media_converter_app.UnsafeOkHttpClient;
-import com.example.media_converter_app.NotificationClass;
 
 import org.json.JSONObject;
 
@@ -47,35 +46,26 @@ import okhttp3.Response;
 
 public class InstagramFragment extends Fragment {
 
-
-    private final String baseAddr = "https://192.168.64.95:9999/api"; //change this
+    private final OkHttpClient client = UnsafeOkHttpClient.getUnsafeClient();
+    String[] availableServers = {"https://192.168.64.95:9999", "https://100.104.214.108:9999"};
     private EditText inputURL;
     private Spinner spinnerType;
     private Button convertButton;
     private Button downloadButton;
-
     private boolean alreadyRedirected = false;
-
     private ImageView instaBlurMenuBackButton;
     private ImageView instaBlurMenuLogOutButton;
     private ImageView instaBlurMenuInfoButton;
-
     private BlurView blurView;
     private BlurTarget blurTarget;
     private TextView instaUser;
-
     private LinearLayout instaMenuButton;
     private ImageView instaConnectionButton;
-
     private LinearLayout instaBlurMenu;
     private LinearLayout instaBlurConnection;
-
     private ImageView instaConnectionBackButton;
     private ImageView instaConnectionRetryButton;
     private Spinner instaConnectionServerSpinner;
-    String[] availableServers = {"https://192.168.64.95:9999","https://100.104.214.108:9999"};
-    private final OkHttpClient client = UnsafeOkHttpClient.getUnsafeClient();
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstance) {
@@ -90,6 +80,7 @@ public class InstagramFragment extends Fragment {
         instaUser = view.findViewById(R.id.instagramUser);
         blurView = view.findViewById(R.id.instagramBlur);
         blurTarget = view.findViewById(R.id.instagramBlurTarget);
+        instaMenuButton = view.findViewById(R.id.instagramMenuBtn);
         instaBlurMenu = view.findViewById(R.id.instagramBlurMenu);
         instaBlurMenuBackButton = view.findViewById(R.id.instagramBackButton);
         instaBlurMenuLogOutButton = view.findViewById(R.id.instagramLogOutButton);
@@ -127,11 +118,11 @@ public class InstagramFragment extends Fragment {
             startConverting();
         });
 
-        instaMenuButton.setOnClickListener(v->{
+        instaMenuButton.setOnClickListener(v -> {
             blurBackground();
         });
 
-        instaConnectionButton.setOnClickListener(v->{
+        instaConnectionButton.setOnClickListener(v -> {
             blurBackgroundConnection();
         });
 
@@ -144,70 +135,70 @@ public class InstagramFragment extends Fragment {
         String mediaType = spinnerType.getSelectedItem().toString();
         JSONObject json = new JSONObject();
 
-        if(instaURL.isEmpty()){
+        if (instaURL.isEmpty()) {
             Toast.makeText(requireContext(), "Please enter a URL...", Toast.LENGTH_SHORT).show();
             convertButton.setClickable(true);
             return;
         }
 
-        try{
+        try {
             json.put("url", instaURL);
             json.put("type", mediaType);
-        }catch (Exception exception){
+        } catch (Exception exception) {
             exception.printStackTrace();
         }
 
         RequestBody payloadBody = RequestBody.create(json.toString(), MediaType.parse("application/json; charset=utf-8"));
-        Request payload = new Request.Builder().url(PreferencesClass.getServer(requireContext()) + "/instagram/convert")
+        Request payload = new Request.Builder().url(PreferencesClass.getServer(requireContext()) + "/api/instagram/convert")
                 .addHeader("Content-Type", "application/json")
                 .addHeader("Authorization", "Bearer" + PreferencesClass.getToken(requireContext()))
                 .post(payloadBody)
                 .build();
 
-        new Thread(()->{
-           try{
-               Response response = client.newCall(payload).execute();
+        new Thread(() -> {
+            try {
+                Response response = client.newCall(payload).execute();
 
-               if(!response.isSuccessful()){
-                   requireActivity().runOnUiThread(()->{
-                       Toast.makeText(requireContext(), "Error: " + response.code(), Toast.LENGTH_SHORT).show();
-                       convertButton.setClickable(true);
-                   });
-               }
+                if (!response.isSuccessful()) {
+                    requireActivity().runOnUiThread(() -> {
+                        Toast.makeText(requireContext(), "Error: " + response.code(), Toast.LENGTH_SHORT).show();
+                        convertButton.setClickable(true);
+                    });
+                }
 
-               assert response.body() != null;
-               String responseText = response.body().string();
-               Log.d("ConvertResponse", responseText);
+                assert response.body() != null;
+                String responseText = response.body().string();
+                Log.d("ConvertResponse", responseText);
 
-               JSONObject jsonObject = new JSONObject(responseText);
-               String fileName = jsonObject.getString("filename");
+                JSONObject jsonObject = new JSONObject(responseText);
+                String fileName = jsonObject.getString("filename");
 
-               requireActivity().runOnUiThread(()->{
-                   convertButton.setVisibility(INVISIBLE);
-                   convertButton.setClickable(false);
-                   downloadButton.setVisibility(VISIBLE);
-                   downloadButton.setClickable(true);
-                   NotificationClass.pushNotification(getContext(), "conversion", fileName);
+                requireActivity().runOnUiThread(() -> {
+                    convertButton.setVisibility(INVISIBLE);
+                    convertButton.setClickable(false);
+                    downloadButton.setVisibility(VISIBLE);
+                    downloadButton.setClickable(true);
+                    NotificationClass.pushNotification(getContext(), "conversion", fileName);
 
-                   downloadButton.setOnClickListener(v -> {
-                       downloadButton.setClickable(false);
-                       downloadInstagramContent(fileName);
-                   });
-               });
-           } catch (Exception exception){
-               exception.printStackTrace();
+                    downloadButton.setOnClickListener(v -> {
+                        downloadButton.setClickable(false);
+                        downloadInstagramContent(fileName);
+                    });
+                });
+            } catch (Exception exception) {
+                exception.printStackTrace();
 
-               requireActivity().runOnUiThread(()->
-                   Toast.makeText(requireContext(), "Error: " + exception, Toast.LENGTH_SHORT).show()
-               );
-           }
+                requireActivity().runOnUiThread(() ->
+                        Toast.makeText(requireContext(), "Error: " + exception, Toast.LENGTH_SHORT).show()
+                );
+            }
         }).start();
 
     }
 
-    private void downloadInstagramContent(String filename){
-        if(filename == null){
-            requireActivity().runOnUiThread(()->{
+    private void downloadInstagramContent(String filename) {
+        if (filename == null) {
+            requireActivity().runOnUiThread(() -> {
                 Toast.makeText(requireContext(), "No file ready to download...", Toast.LENGTH_SHORT).show();
                 downloadButton.setVisibility(View.INVISIBLE);
                 downloadButton.setClickable(false);
@@ -219,25 +210,25 @@ public class InstagramFragment extends Fragment {
 
         JSONObject json = new JSONObject();
 
-        try{
+        try {
             json.put("filename", filename);
-        } catch (Exception exception){
+        } catch (Exception exception) {
             exception.printStackTrace();
         }
 
         RequestBody payloadBody = RequestBody.create(json.toString(), MediaType.parse("application/json; charset=utf-8"));
 
         Request payload = new Request.Builder()
-                .url(PreferencesClass.getServer(requireContext()) + "/instagram/download")
+                .url(PreferencesClass.getServer(requireContext()) + "/api/instagram/download")
                 .post(payloadBody)
                 .build();
 
-        new Thread(()->{
-            try{
+        new Thread(() -> {
+            try {
                 Response response = client.newCall(payload).execute();
 
-                if(!response.isSuccessful()){
-                    requireActivity().runOnUiThread(()->{
+                if (!response.isSuccessful()) {
+                    requireActivity().runOnUiThread(() -> {
                         Toast.makeText(requireContext(), "Error: " + response.code(), Toast.LENGTH_SHORT).show();
                         downloadButton.setClickable(true);
                     });
@@ -254,22 +245,22 @@ public class InstagramFragment extends Fragment {
                 byte[] buffer = new byte[4096];
                 int read;
 
-                while((read = inputStream.read(buffer)) != -1){
+                while ((read = inputStream.read(buffer)) != -1) {
                     fileOutputStream.write(buffer, 0, read);
                 }
                 fileOutputStream.flush();
                 fileOutputStream.close();
                 inputStream.close();
 
-                requireActivity().runOnUiThread(()->{
+                requireActivity().runOnUiThread(() -> {
                     Toast.makeText(requireContext(), "Downloaded: " + filename, Toast.LENGTH_SHORT).show();
                 });
 
                 deleteBackendFile(filename);
 
-            } catch (Exception exception){
+            } catch (Exception exception) {
                 exception.printStackTrace();
-                requireActivity().runOnUiThread(()->{
+                requireActivity().runOnUiThread(() -> {
                     Toast.makeText(requireContext(), "Error: " + exception, Toast.LENGTH_SHORT).show();
                     downloadButton.setClickable(true);
                 });
@@ -278,26 +269,28 @@ public class InstagramFragment extends Fragment {
 
     }
 
-    private void  deleteBackendFile(String filename){
+    private void deleteBackendFile(String filename) {
         JSONObject json = new JSONObject();
         NotificationClass.pushNotification(getContext(), "download", filename);
-        try{
+        try {
             json.put("filename", filename);
-        }catch (Exception ignored){}
+        } catch (Exception ignored) {
+        }
 
         RequestBody payloadBody = RequestBody.create(json.toString(), MediaType.parse("application/json; charset=utf-8"));
 
         Request payload = new Request.Builder()
-                .url(PreferencesClass.getServer(requireContext()) + "/instagram/delete")
+                .url(PreferencesClass.getServer(requireContext()) + "/api/instagram/delete")
                 .delete(payloadBody)
                 .build();
 
-        new Thread(()->{
-           try{
-               client.newCall(payload).execute();
-           } catch (Exception ignored){}
+        new Thread(() -> {
+            try {
+                client.newCall(payload).execute();
+            } catch (Exception ignored) {
+            }
 
-            requireActivity().runOnUiThread(()->{
+            requireActivity().runOnUiThread(() -> {
                 downloadButton.setClickable(false);
                 downloadButton.setVisibility(View.INVISIBLE);
 
@@ -310,7 +303,7 @@ public class InstagramFragment extends Fragment {
         }).start();
     }
 
-    private void blurBackgroundConnection(){
+    private void blurBackgroundConnection() {
         float radius = 20f;
         Drawable windowBackground = requireActivity().getWindow().getDecorView().getBackground();
 
@@ -329,21 +322,22 @@ public class InstagramFragment extends Fragment {
         int currentIndex = Arrays.stream(availableServers).toList().indexOf(PreferencesClass.getServer(requireContext()));
         instaConnectionServerSpinner.setSelection(currentIndex);
 
-        instaConnectionBackButton.setOnClickListener(v->{
+        instaConnectionBackButton.setOnClickListener(v -> {
             blurView.setAlpha(1f);
             blurView.animate().alpha(0f).setDuration(400).start();
             blurView.setVisibility(GONE);
+            instaBlurConnection.setVisibility(GONE);
             enableBackUI(true);
         });
 
-        instaConnectionRetryButton.setOnClickListener(v->{
+        instaConnectionRetryButton.setOnClickListener(v -> {
             String selectedServer = instaConnectionServerSpinner.getSelectedItem().toString();
             checkConnection(selectedServer);
         });
 
     }
 
-    private void blurBackground(){
+    private void blurBackground() {
         float radius = 20f;
         Drawable windowBackground = requireActivity().getWindow().getDecorView().getBackground();
 
@@ -355,7 +349,7 @@ public class InstagramFragment extends Fragment {
 
         enableBackUI(false);
 
-        instaBlurMenuBackButton.setOnClickListener(v->{
+        instaBlurMenuBackButton.setOnClickListener(v -> {
             blurView.setAlpha(1f);
             blurView.animate().alpha(0f).setDuration(400).start();
             blurView.setVisibility(GONE);
@@ -363,7 +357,7 @@ public class InstagramFragment extends Fragment {
             enableBackUI(true);
         });
 
-        instaBlurMenuLogOutButton.setOnClickListener(v->{
+        instaBlurMenuLogOutButton.setOnClickListener(v -> {
             PreferencesClass.clearToken(requireContext());
             PreferencesClass.clearUser(requireContext());
 
@@ -374,14 +368,14 @@ public class InstagramFragment extends Fragment {
             requireActivity().finish();
         });
 
-        instaBlurMenuInfoButton.setOnClickListener(v->{
-            requireActivity().runOnUiThread(()-> {
+        instaBlurMenuInfoButton.setOnClickListener(v -> {
+            requireActivity().runOnUiThread(() -> {
                 Toast.makeText(requireContext(), "Boomshakalaka", Toast.LENGTH_SHORT).show();
             });
         });
     }
 
-    private void enableBackUI(boolean flag){
+    private void enableBackUI(boolean flag) {
         inputURL.setEnabled(flag);
         spinnerType.setEnabled(flag);
         convertButton.setEnabled(flag);
@@ -422,7 +416,7 @@ public class InstagramFragment extends Fragment {
                     redirectToLoginOnce();
                 }
             } catch (Exception exception) {
-                requireActivity().runOnUiThread(()->{
+                requireActivity().runOnUiThread(() -> {
                     instaUser.setText("User");
                 });
                 exception.printStackTrace();
@@ -459,7 +453,7 @@ public class InstagramFragment extends Fragment {
                         instaConnectionButton.setImageResource(R.drawable.link_100);
                     });
                 } else {
-                    requireActivity().runOnUiThread(()->{
+                    requireActivity().runOnUiThread(() -> {
                         Toast.makeText(requireContext(), "Error while trying to connect!", Toast.LENGTH_SHORT).show();
                         instaConnectionButton.setImageResource(R.drawable.broken_link_100);
                     });
