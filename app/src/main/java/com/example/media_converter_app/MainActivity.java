@@ -38,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
         viewPager2 = findViewById(R.id.viewPager);
         PagerAdapter adapter = new PagerAdapter(this);
         viewPager2.setAdapter(adapter);
+        viewPager2.setCurrentItem(1, false);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS)
@@ -48,7 +49,6 @@ public class MainActivity extends AppCompatActivity {
                         101);
             }
         }
-
 
     }
 }

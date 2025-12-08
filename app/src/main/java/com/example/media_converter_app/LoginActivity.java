@@ -206,7 +206,7 @@ public class LoginActivity extends AppCompatActivity {
         float radius = 20f;
         Drawable windowBackground = getWindow().getDecorView().getBackground();
 
-        loginBlurView.setupWith(loginBlurTarget).setFrameClearDrawable(windowBackground);
+        loginBlurView.setupWith(loginBlurTarget).setFrameClearDrawable(windowBackground).setBlurRadius(radius);
         loginBlurView.setVisibility(VISIBLE);
         loginBlurView.setAlpha(0f);
         loginBlurView.animate().alpha(1f).setDuration(400).start();

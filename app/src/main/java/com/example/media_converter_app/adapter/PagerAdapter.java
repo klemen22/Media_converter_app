@@ -20,9 +20,9 @@ public class PagerAdapter extends FragmentStateAdapter {
     public Fragment createFragment(int position) {
         switch (position) {
             case 0:
-                return new YoutubeFragment();
-            case 1:
                 return new InstagramFragment();
+            case 1:
+                return new YoutubeFragment();
             case 2:
                 return new TikTokFragment();
             default:

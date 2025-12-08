@@ -9,7 +9,6 @@
         android:id="@+id/tiktokBlurTarget"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/dark_gray"
         android:padding="20dp">
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -35,7 +34,7 @@
                     app:layout_constraintTop_toTopOf="parent">
 
                     <ImageView
-                        android:id="@+id/tiktokUser"
+                        android:id="@+id/tiktokUserPicture"
                         android:layout_width="40dp"
                         android:layout_height="40dp"
                         android:src="@drawable/account_64" />
@@ -85,16 +84,28 @@
                 <EditText
                     android:id="@+id/tiktokInput"
                     android:layout_width="match_parent"
+                    android:textSize="18sp"
                     android:layout_height="40dp"
+                    android:paddingBottom="2dp"
+                    android:paddingTop="18dp"
                     android:layout_marginTop="20dp"
                     android:hint="Enter TikTok URL..."
                     android:textColor="@color/white"
-                    android:textColorHint="@color/white" />
+                    android:textColorHint="@color/white"
+                    android:background="@color/dark_gray" />
+
+                <View
+                    android:layout_width="wrap_content"
+                    android:layout_height="2dp"
+                    android:background="@drawable/input_underline" />
 
             </LinearLayout>
 
             <Button
                 android:id="@+id/tiktokConvertBtn"
+                android:textSize="16sp"
+                android:textColor="@color/white"
+                android:backgroundTint="@color/gray_secondary"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="20dp"
@@ -106,6 +117,9 @@
 
             <Button
                 android:id="@+id/tiktokDownloadBtn"
+                android:textColor="@color/white"
+                android:backgroundTint="@color/gray_secondary"
+                android:textSize="16sp"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="20dp"
@@ -130,7 +144,6 @@
             android:id="@+id/tiktokBlurMenu"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/dark_gray"
             android:gravity="center"
             android:orientation="vertical"
             android:visibility="gone">
@@ -165,7 +178,6 @@
             android:id="@+id/tiktokBlurConnection"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/dark_gray"
             android:gravity="center"
             android:orientation="vertical"
             android:visibility="gone">

@@ -9,7 +9,6 @@
         android:id="@+id/instagramBlurTarget"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/dark_gray"
         android:padding="20dp">
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -53,6 +52,7 @@
 
                 <ImageView
                     android:id="@+id/instagramConnectionButton"
+                    android:backgroundTint="@color/gray_secondary"
                     android:layout_width="30dp"
                     android:layout_height="30dp"
                     android:src="@drawable/broken_link_100"
@@ -82,12 +82,21 @@
 
                 <EditText
                     android:id="@+id/instagramInput"
+                    android:textSize="18sp"
+                    android:paddingTop="18dp"
+                    android:paddingBottom="2dp"
                     android:layout_width="match_parent"
                     android:layout_height="40dp"
                     android:layout_marginTop="20dp"
                     android:hint="Enter Instagram URL..."
                     android:textColor="@color/white"
-                    android:textColorHint="@color/white" />
+                    android:textColorHint="@color/white"
+                    android:background="@color/dark_gray" />
+
+                <View
+                    android:layout_width="wrap_content"
+                    android:layout_height="2dp"
+                    android:background="@drawable/input_underline" />
 
                 <LinearLayout
                     android:id="@+id/instagramSpinnerContainer"
@@ -105,6 +114,9 @@
 
             <Button
                 android:id="@+id/instagramConvertBtn"
+                android:backgroundTint="@color/gray_secondary"
+                android:textSize="16sp"
+                android:textColor="@color/white"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="20dp"
@@ -118,6 +130,8 @@
 
             <Button
                 android:id="@+id/instagramDownloadBtn"
+                android:backgroundTint="@color/gray_secondary"
+                android:textSize="16sp"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="20dp"
@@ -142,7 +156,6 @@
             android:id="@+id/instagramBlurMenu"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/dark_gray"
             android:gravity="center"
             android:orientation="vertical"
             android:visibility="gone">
@@ -177,7 +190,6 @@
             android:id="@+id/instagramBlurConnection"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/dark_gray"
             android:gravity="center"
             android:orientation="vertical"
             android:visibility="gone">
