@@ -119,6 +119,33 @@
                 </LinearLayout>
             </LinearLayout>
 
+            <TextView
+                android:id="@+id/youtubeTextProgress"
+                android:text="Converting..."
+                android:textColor="@color/gray_secondary"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="invisible"
+                app:layout_constraintBottom_toTopOf="@+id/youtubeProgressBar"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <ProgressBar
+                android:id="@+id/youtubeProgressBar"
+                android:layout_width="0dp"
+                style="@android:style/Widget.DeviceDefault.Light.ProgressBar.Horizontal"
+                android:layout_height="wrap_content"
+                app:layout_constraintBottom_toTopOf="@+id/youtubeDownloadBtn"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginBottom="10dp"
+                android:paddingStart="20dp"
+                android:paddingEnd="20dp"
+                android:indeterminate="true"
+                android:progressBackgroundTint="@color/gray_secondary"
+                android:progressTint="@color/white"
+                android:visibility="invisible" />
+
             <Button
                 android:id="@+id/youtubeConvertBtn"
                 android:textSize="16sp"

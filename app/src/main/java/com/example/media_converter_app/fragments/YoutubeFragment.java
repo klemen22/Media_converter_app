@@ -18,6 +18,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -68,6 +69,8 @@ public class YoutubeFragment extends Fragment {
     private ImageView ytBlurBackButton;
     private ImageView ytBlurRetryButton;
     private Spinner ytBlurServerSpinner;
+    private ProgressBar ytProgressBar;
+    private TextView ytProgressText;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstance) {
@@ -94,10 +97,15 @@ public class YoutubeFragment extends Fragment {
         ytBlurBackButton = view.findViewById(R.id.youtubeBlurBack);
         ytBlurRetryButton = view.findViewById(R.id.youtubeBlurRetry);
 
+        ytProgressBar = view.findViewById(R.id.youtubeProgressBar);
+        ytProgressText = view.findViewById(R.id.youtubeTextProgress);
+
 
         tokenCheck();
         checkConnection(PreferencesClass.getServer(requireContext()));
         enableBackUI(true); // quick reset
+        ytProgressBar.setVisibility(INVISIBLE);
+        ytProgressText.setVisibility(INVISIBLE);
 
         downloadButton.setVisibility(INVISIBLE);
         downloadButton.setClickable(false);
@@ -172,6 +180,9 @@ public class YoutubeFragment extends Fragment {
         String ytURL = inputURL.getText().toString();
         String mediaType = spinnerType.getSelectedItem().toString();
         JSONObject json = new JSONObject();
+        ytProgressBar.setVisibility(VISIBLE);
+        ytProgressText.setText("Converting...");
+        ytProgressText.setVisibility(VISIBLE);
 
         if (ytURL.isEmpty()) {
             Toast.makeText(requireContext(), "Please enter a URL...", Toast.LENGTH_SHORT).show();
@@ -222,6 +233,9 @@ public class YoutubeFragment extends Fragment {
                     convertButton.setClickable(false);
                     downloadButton.setVisibility(VISIBLE);
                     downloadButton.setClickable(true);
+                    ytProgressBar.setVisibility(INVISIBLE);
+                    ytProgressText.setVisibility(INVISIBLE);
+
                     NotificationClass.pushNotification(getContext(), "conversion", fileName);
 
                     downloadButton.setOnClickListener(v -> {
@@ -254,6 +268,12 @@ public class YoutubeFragment extends Fragment {
             });
             return;
         }
+
+        requireActivity().runOnUiThread(() -> {
+            ytProgressBar.setVisibility(VISIBLE);
+            ytProgressText.setText("Downloading...");
+            ytProgressText.setVisibility(VISIBLE);
+        });
 
         JSONObject json = new JSONObject();
 
@@ -301,9 +321,11 @@ public class YoutubeFragment extends Fragment {
                 fileOutputStream.close();
                 inputStream.close();
 
-                requireActivity().runOnUiThread(() ->
-                        Toast.makeText(requireContext(), "Downloaded: " + filename, Toast.LENGTH_SHORT).show()
-                );
+                requireActivity().runOnUiThread(() -> {
+                    ytProgressBar.setVisibility(INVISIBLE);
+                    ytProgressText.setVisibility(INVISIBLE);
+                    Toast.makeText(requireContext(), "Downloaded: " + filename, Toast.LENGTH_SHORT).show();
+                });
 
                 // delete from backend
                 deleteBackendFile(filename);

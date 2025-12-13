@@ -17,6 +17,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -65,6 +66,8 @@ public class TikTokFragment extends Fragment {
     private ImageView tiktokConnectionRetry;
     private ImageView tiktokConnectionBack;
     private LinearLayout tiktokMenuButton;
+    private ProgressBar tiktokProgressBar;
+    private TextView tiktokProgressText;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstance) {
@@ -89,9 +92,14 @@ public class TikTokFragment extends Fragment {
         tiktokConnectionRetry = view.findViewById(R.id.tiktokConnectionRetry);
         tiktokConnectionBack = view.findViewById(R.id.tiktokConnectionBack);
 
+        tiktokProgressBar = view.findViewById(R.id.tiktokProgressBar);
+        tiktokProgressText = view.findViewById(R.id.tiktokTextProgress);
+
         tokenCheck();
         checkConnection(PreferencesClass.getServer(requireContext()));
         enableBackUI(true);
+        tiktokProgressText.setVisibility(INVISIBLE);
+        tiktokProgressBar.setVisibility(INVISIBLE);
 
         downloadButton.setVisibility(INVISIBLE);
         downloadButton.setClickable(false);
@@ -117,6 +125,9 @@ public class TikTokFragment extends Fragment {
     private void startConverting() {
         String tikURL = inputURL.getText().toString();
         JSONObject json = new JSONObject();
+        tiktokProgressBar.setVisibility(VISIBLE);
+        tiktokProgressText.setText("Converting...");
+        tiktokProgressText.setVisibility(VISIBLE);
 
         if (tikURL.isEmpty()) {
             Toast.makeText(requireContext(), "Please enter a URL...", Toast.LENGTH_SHORT).show();
@@ -161,6 +172,8 @@ public class TikTokFragment extends Fragment {
                     downloadButton.setVisibility(VISIBLE);
                     downloadButton.setClickable(true);
                     NotificationClass.pushNotification(getContext(), "conversion", filename);
+                    tiktokProgressBar.setVisibility(INVISIBLE);
+                    tiktokProgressText.setVisibility(INVISIBLE);
 
                     downloadButton.setOnClickListener(v -> {
                         downloadButton.setClickable(false);
@@ -191,6 +204,12 @@ public class TikTokFragment extends Fragment {
             });
             return;
         }
+
+        requireActivity().runOnUiThread(() -> {
+            tiktokProgressBar.setVisibility(VISIBLE);
+            tiktokProgressText.setText("Downloading...");
+            tiktokProgressText.setVisibility(VISIBLE);
+        });
 
         JSONObject json = new JSONObject();
 
@@ -236,10 +255,13 @@ public class TikTokFragment extends Fragment {
                 fileOutputStream.close();
                 inputStream.close();
 
-                requireActivity().runOnUiThread(() ->
-                        Toast.makeText(requireContext(), "Downloaded: " + filename, Toast.LENGTH_SHORT).show()
+                requireActivity().runOnUiThread(() -> {
+                    Toast.makeText(requireContext(), "Downloaded: " + filename, Toast.LENGTH_SHORT).show();
+                    tiktokProgressBar.setVisibility(INVISIBLE);
+                    tiktokProgressText.setVisibility(INVISIBLE);
 
-                );
+
+                });
 
                 deleteBackendFile(filename);
 

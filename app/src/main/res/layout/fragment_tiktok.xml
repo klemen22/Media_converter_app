@@ -101,6 +101,33 @@
 
             </LinearLayout>
 
+            <TextView
+                android:id="@+id/tiktokTextProgress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Converting..."
+                android:textColor="@color/gray_secondary"
+                android:visibility="invisible"
+                app:layout_constraintBottom_toTopOf="@+id/tiktokProgressBar"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <ProgressBar
+                android:id="@+id/tiktokProgressBar"
+                style="@android:style/Widget.DeviceDefault.Light.ProgressBar.Horizontal"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:indeterminate="true"
+                android:paddingStart="20dp"
+                android:paddingEnd="20dp"
+                android:progressBackgroundTint="@color/gray_secondary"
+                android:progressTint="@color/white"
+                android:visibility="invisible"
+                app:layout_constraintBottom_toTopOf="@+id/tiktokDownloadBtn"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
             <Button
                 android:id="@+id/tiktokConvertBtn"
                 android:textSize="16sp"

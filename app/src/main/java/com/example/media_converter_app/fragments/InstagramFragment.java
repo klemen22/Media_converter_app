@@ -17,6 +17,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -66,6 +67,8 @@ public class InstagramFragment extends Fragment {
     private ImageView instaConnectionBackButton;
     private ImageView instaConnectionRetryButton;
     private Spinner instaConnectionServerSpinner;
+    private ProgressBar instaProgressBar;
+    private TextView instaProgressText;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstance) {
@@ -93,10 +96,15 @@ public class InstagramFragment extends Fragment {
         instaConnectionBackButton = view.findViewById(R.id.instagramBlurBack);
         instaConnectionRetryButton = view.findViewById(R.id.instagramBlurRetry);
 
+        instaProgressBar = view.findViewById(R.id.instagramProgressBar);
+        instaProgressText = view.findViewById(R.id.instagramTextProgress);
+
         // quick reset
         tokenCheck();
         checkConnection(PreferencesClass.getServer(requireContext()));
         enableBackUI(true);
+        instaProgressBar.setVisibility(INVISIBLE);
+        instaProgressText.setVisibility(INVISIBLE);
 
         downloadButton.setVisibility(INVISIBLE);
         downloadButton.setClickable(false);
@@ -134,6 +142,10 @@ public class InstagramFragment extends Fragment {
         String instaURL = inputURL.getText().toString();
         String mediaType = spinnerType.getSelectedItem().toString();
         JSONObject json = new JSONObject();
+
+        instaProgressBar.setVisibility(VISIBLE);
+        instaProgressText.setText("Converting...");
+        instaProgressText.setVisibility(VISIBLE);
 
         if (instaURL.isEmpty()) {
             Toast.makeText(requireContext(), "Please enter a URL...", Toast.LENGTH_SHORT).show();
@@ -180,6 +192,9 @@ public class InstagramFragment extends Fragment {
                     downloadButton.setClickable(true);
                     NotificationClass.pushNotification(getContext(), "conversion", fileName);
 
+                    instaProgressBar.setVisibility(INVISIBLE);
+                    instaProgressText.setVisibility(INVISIBLE);
+
                     downloadButton.setOnClickListener(v -> {
                         downloadButton.setClickable(false);
                         downloadInstagramContent(fileName);
@@ -207,6 +222,12 @@ public class InstagramFragment extends Fragment {
             });
             return;
         }
+
+        requireActivity().runOnUiThread(() -> {
+            instaProgressBar.setVisibility(VISIBLE);
+            instaProgressText.setText("Downloading...");
+            instaProgressText.setVisibility(VISIBLE);
+        });
 
         JSONObject json = new JSONObject();
 
@@ -254,6 +275,8 @@ public class InstagramFragment extends Fragment {
 
                 requireActivity().runOnUiThread(() -> {
                     Toast.makeText(requireContext(), "Downloaded: " + filename, Toast.LENGTH_SHORT).show();
+                    instaProgressBar.setVisibility(INVISIBLE);
+                    instaProgressText.setVisibility(INVISIBLE);
                 });
 
                 deleteBackendFile(filename);
