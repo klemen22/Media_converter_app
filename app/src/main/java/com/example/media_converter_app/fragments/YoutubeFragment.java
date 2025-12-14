@@ -191,6 +191,8 @@ public class YoutubeFragment extends Fragment {
         if (ytURL.isEmpty()) {
             Toast.makeText(requireContext(), "Please enter a URL...", Toast.LENGTH_SHORT).show();
             convertButton.setClickable(true);
+            ytProgressText.setVisibility(INVISIBLE);
+            ytProgressBar.setVisibility(INVISIBLE);
             return;
         }
 
@@ -221,6 +223,8 @@ public class YoutubeFragment extends Fragment {
                     requireActivity().runOnUiThread(() -> {
                         Toast.makeText(requireContext(), "Error: " + response.code(), Toast.LENGTH_SHORT).show();
                         convertButton.setClickable(true);
+                        ytProgressBar.setVisibility(INVISIBLE);
+                        ytProgressText.setVisibility(INVISIBLE);
                     });
                     return;
                 }
@@ -302,6 +306,8 @@ public class YoutubeFragment extends Fragment {
                     requireActivity().runOnUiThread(() -> {
                         Toast.makeText(requireContext(), "Error: " + response.code(), Toast.LENGTH_SHORT).show();
                         downloadButton.setClickable(true);
+                        ytProgressText.setVisibility(INVISIBLE);
+                        ytProgressBar.setVisibility(INVISIBLE);
                     });
                     return;
                 }

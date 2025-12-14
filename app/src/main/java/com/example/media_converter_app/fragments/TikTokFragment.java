@@ -136,6 +136,8 @@ public class TikTokFragment extends Fragment {
         if (tikURL.isEmpty()) {
             Toast.makeText(requireContext(), "Please enter a URL...", Toast.LENGTH_SHORT).show();
             convertButton.setClickable(true);
+            tiktokProgressText.setVisibility(INVISIBLE);
+            tiktokProgressBar.setVisibility(INVISIBLE);
             return;
         }
 
@@ -160,6 +162,8 @@ public class TikTokFragment extends Fragment {
                     requireActivity().runOnUiThread(() -> {
                         Toast.makeText(requireContext(), "Error: " + response.code(), Toast.LENGTH_SHORT).show();
                         convertButton.setClickable(true);
+                        tiktokProgressBar.setVisibility(INVISIBLE);
+                        tiktokProgressText.setVisibility(INVISIBLE);
                     });
                     return;
                 }
@@ -237,6 +241,8 @@ public class TikTokFragment extends Fragment {
                     requireActivity().runOnUiThread(() -> {
                         Toast.makeText(requireContext(), "Error: " + response.code(), Toast.LENGTH_SHORT).show();
                         downloadButton.setClickable(true);
+                        tiktokProgressText.setVisibility(INVISIBLE);
+                        tiktokProgressBar.setVisibility(INVISIBLE);
                     });
                     return;
                 }

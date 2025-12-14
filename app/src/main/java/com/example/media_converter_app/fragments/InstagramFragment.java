@@ -154,6 +154,8 @@ public class InstagramFragment extends Fragment {
         if (instaURL.isEmpty()) {
             Toast.makeText(requireContext(), "Please enter a URL...", Toast.LENGTH_SHORT).show();
             convertButton.setClickable(true);
+            instaProgressBar.setVisibility(INVISIBLE);
+            instaProgressText.setVisibility(INVISIBLE);
             return;
         }
 
@@ -256,6 +258,8 @@ public class InstagramFragment extends Fragment {
                     requireActivity().runOnUiThread(() -> {
                         Toast.makeText(requireContext(), "Error: " + response.code(), Toast.LENGTH_SHORT).show();
                         downloadButton.setClickable(true);
+                        instaProgressText.setVisibility(INVISIBLE);
+                        instaProgressBar.setVisibility(INVISIBLE);
                     });
                     return;
                 }
