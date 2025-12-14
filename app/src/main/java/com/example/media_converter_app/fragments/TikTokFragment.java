@@ -68,6 +68,7 @@ public class TikTokFragment extends Fragment {
     private LinearLayout tiktokMenuButton;
     private ProgressBar tiktokProgressBar;
     private TextView tiktokProgressText;
+    private ProgressBar tiktokReconnectBar;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstance) {
@@ -95,11 +96,14 @@ public class TikTokFragment extends Fragment {
         tiktokProgressBar = view.findViewById(R.id.tiktokProgressBar);
         tiktokProgressText = view.findViewById(R.id.tiktokTextProgress);
 
+        tiktokReconnectBar = view.findViewById(R.id.tiktokReconnectBar);
+
         tokenCheck();
-        checkConnection(PreferencesClass.getServer(requireContext()));
+        checkConnection(PreferencesClass.getServer(requireContext()), false);
         enableBackUI(true);
         tiktokProgressText.setVisibility(INVISIBLE);
         tiktokProgressBar.setVisibility(INVISIBLE);
+        tiktokReconnectBar.setVisibility(INVISIBLE);
 
         downloadButton.setVisibility(INVISIBLE);
         downloadButton.setClickable(false);
@@ -144,7 +148,7 @@ public class TikTokFragment extends Fragment {
         RequestBody payloadBody = RequestBody.create(json.toString(), MediaType.parse("application/json; charset=utf-8"));
         Request payload = new Request.Builder().url(PreferencesClass.getServer(requireContext()) + "/api/tiktok/convert")
                 .addHeader("Content-Type", "application/json")
-                .addHeader("Authorization", "Bearer" + PreferencesClass.getToken(requireContext()))
+                .addHeader("Authorization", "Bearer " + PreferencesClass.getToken(requireContext()))
                 .post(payloadBody)
                 .build();
 
@@ -205,11 +209,10 @@ public class TikTokFragment extends Fragment {
             return;
         }
 
-        requireActivity().runOnUiThread(() -> {
-            tiktokProgressBar.setVisibility(VISIBLE);
-            tiktokProgressText.setText("Downloading...");
-            tiktokProgressText.setVisibility(VISIBLE);
-        });
+
+        tiktokProgressBar.setVisibility(VISIBLE);
+        tiktokProgressText.setText("Downloading...");
+        tiktokProgressText.setVisibility(VISIBLE);
 
         JSONObject json = new JSONObject();
 
@@ -222,7 +225,7 @@ public class TikTokFragment extends Fragment {
         RequestBody payloadBody = RequestBody.create(json.toString(), MediaType.parse("application/json; charset=utf-8"));
 
         Request payload = new Request.Builder()
-                .url(PreferencesClass.getServer(requireContext()) + "/api/tiktok/convert")
+                .url(PreferencesClass.getServer(requireContext()) + "/api/tiktok/download")
                 .post(payloadBody)
                 .build();
 
@@ -377,7 +380,7 @@ public class TikTokFragment extends Fragment {
 
         tiktokConnectionRetry.setOnClickListener(v -> {
             String selectedServer = tiktokConnectionSpinner.getSelectedItem().toString();
-            checkConnection(selectedServer);
+            checkConnection(selectedServer, true);
         });
 
 
@@ -412,7 +415,12 @@ public class TikTokFragment extends Fragment {
                 Response response = client.newCall(request).execute();
                 Log.d("userDebug", "Response: " + response);
 
-                if (response.code() == 200) {
+                assert response.body() != null;
+                String responseText = response.body().string();
+                JSONObject jsonObject = new JSONObject(responseText);
+                String status = jsonObject.getString("status");
+
+                if (response.code() == 200 && !status.equals("error")) {
                     requireActivity().runOnUiThread(() -> {
                         if (isAdded()) {
                             tiktokUser.setText(PreferencesClass.getUser(requireContext()));
@@ -446,23 +454,36 @@ public class TikTokFragment extends Fragment {
         });
     }
 
-    private void checkConnection(String address) {
+    private void checkConnection(String address, Boolean blurFlag) {
         String url = address + "/api/ping";
         Request request = new Request.Builder().url(url).get().build();
 
         new Thread(() -> {
             try {
+                if (blurFlag) {
+                    requireActivity().runOnUiThread(() -> {
+                        tiktokReconnectBar.setVisibility(VISIBLE);
+                    });
+                }
+
                 Response response = client.newCall(request).execute();
                 if (response.code() == 200) {
                     requireActivity().runOnUiThread(() -> {
-                        Toast.makeText(requireContext(), "Connected!", Toast.LENGTH_SHORT).show();
+                        // Toast.makeText(requireContext(), "Connected!", Toast.LENGTH_SHORT).show();
                         PreferencesClass.setServer(requireContext(), address);
                         tiktokConnectionButton.setImageResource(R.drawable.link_100);
+                        if (blurFlag) {
+                            tiktokReconnectBar.setVisibility(INVISIBLE);
+                            Toast.makeText(requireContext(), "Connected!", Toast.LENGTH_SHORT).show();
+                        }
                     });
                 } else {
                     requireActivity().runOnUiThread(() -> {
                         Toast.makeText(requireContext(), "Error while trying to connect!", Toast.LENGTH_SHORT).show();
                         tiktokConnectionButton.setImageResource(R.drawable.broken_link_100);
+                        if (blurFlag) {
+                            tiktokReconnectBar.setVisibility(INVISIBLE);
+                        }
                     });
 
                 }

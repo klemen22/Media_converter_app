@@ -81,16 +81,16 @@
 
                 <EditText
                     android:id="@+id/youtubeInput"
-                    android:textSize="18sp"
-                    android:paddingTop="18dp"
-                    android:paddingBottom="2dp"
                     android:layout_width="match_parent"
                     android:layout_height="40dp"
                     android:layout_marginTop="20dp"
+                    android:background="@color/dark_gray"
                     android:hint="Enter Youtube URL..."
+                    android:paddingTop="18dp"
+                    android:paddingBottom="2dp"
                     android:textColor="@color/white"
                     android:textColorHint="@color/white"
-                    android:background="@color/dark_gray" />
+                    android:textSize="18sp" />
 
                 <View
                     android:layout_width="wrap_content"
@@ -121,41 +121,41 @@
 
             <TextView
                 android:id="@+id/youtubeTextProgress"
-                android:text="Converting..."
-                android:textColor="@color/gray_secondary"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:text="Converting..."
+                android:textColor="@color/gray_secondary"
                 android:visibility="invisible"
                 app:layout_constraintBottom_toTopOf="@+id/youtubeProgressBar"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
 
             <ProgressBar
                 android:id="@+id/youtubeProgressBar"
-                android:layout_width="0dp"
                 style="@android:style/Widget.DeviceDefault.Light.ProgressBar.Horizontal"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                app:layout_constraintBottom_toTopOf="@+id/youtubeDownloadBtn"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
                 android:layout_marginBottom="10dp"
+                android:indeterminate="true"
                 android:paddingStart="20dp"
                 android:paddingEnd="20dp"
-                android:indeterminate="true"
                 android:progressBackgroundTint="@color/gray_secondary"
                 android:progressTint="@color/white"
-                android:visibility="invisible" />
+                android:visibility="invisible"
+                app:layout_constraintBottom_toTopOf="@+id/youtubeDownloadBtn"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
 
             <Button
                 android:id="@+id/youtubeConvertBtn"
-                android:textSize="16sp"
-                android:textColor="@color/white"
-                android:backgroundTint="@color/gray_secondary"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="20dp"
+                android:backgroundTint="@color/gray_secondary"
                 android:padding="14dp"
                 android:text="Convert"
+                android:textColor="@color/white"
+                android:textSize="16sp"
                 android:visibility="visible"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -163,15 +163,15 @@
 
             <Button
                 android:id="@+id/youtubeDownloadBtn"
-                android:backgroundTint="@color/gray_secondary"
-                android:textColor="@color/white"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="20dp"
-                android:textSize="16sp"
+                android:backgroundTint="@color/gray_secondary"
                 android:clickable="false"
                 android:padding="14dp"
                 android:text="Download"
+                android:textColor="@color/white"
+                android:textSize="16sp"
                 android:visibility="invisible"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -236,9 +236,24 @@
                 android:layout_gravity="center"
                 android:layout_marginStart="5dp"
                 android:layout_marginEnd="10dp"
-                android:layout_marginBottom="20dp"
+                android:layout_marginBottom="10dp"
                 android:gravity="center"
                 android:spinnerMode="dialog" />
+
+            <ProgressBar
+                android:id="@+id/youtubeReconnectBar"
+                style="@android:style/Widget.DeviceDefault.Light.ProgressBar.Horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
+                android:layout_marginBottom="20dp"
+                android:indeterminate="true"
+                android:paddingStart="20dp"
+                android:paddingEnd="20dp"
+                android:progressBackgroundTint="@color/gray_secondary"
+                android:progressTint="@color/white"
+                android:visibility="invisible" />
 
             <ImageView
                 android:id="@+id/youtubeBlurRetry"

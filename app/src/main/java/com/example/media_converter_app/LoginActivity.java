@@ -1,6 +1,7 @@
 package com.example.media_converter_app;
 
 import static android.view.View.GONE;
+import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
 
 import android.content.Intent;
@@ -13,6 +14,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -45,6 +47,7 @@ public class LoginActivity extends AppCompatActivity {
     private BlurTarget loginBlurTarget;
     private ImageView loginRetryBtn;
     private ImageView loginBackBtn;
+    private ProgressBar loginReconnectBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,12 +81,14 @@ public class LoginActivity extends AppCompatActivity {
         loginBlurTarget = findViewById(R.id.loginBlurTarget);
         loginRetryBtn = findViewById(R.id.loginRetry);
         loginBackBtn = findViewById(R.id.loginBack);
+        loginReconnectBar = findViewById(R.id.loginReconnectBar);
 
         // check connection to server
-        checkConnection(PreferencesClass.getServer(this));
+        checkConnection(PreferencesClass.getServer(this), false);
 
         // quick reset
         enableUI(true);
+        loginReconnectBar.setVisibility(INVISIBLE);
 
         loginBtn.setOnClickListener(v -> {
             Log.d("LoginDebug", "Login button was pressed");
@@ -221,7 +226,7 @@ public class LoginActivity extends AppCompatActivity {
 
         loginRetryBtn.setOnClickListener(v -> {
             String selectedServer = loginServerSelect.getSelectedItem().toString();
-            checkConnection(selectedServer);
+            checkConnection(selectedServer, true);
         });
 
         loginBackBtn.setOnClickListener(v -> {
@@ -232,23 +237,35 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    private void checkConnection(String address) {
+    private void checkConnection(String address, Boolean blurFlag) {
         String url = address + "/api/ping";
         Request request = new Request.Builder().url(url).get().build();
 
         new Thread(() -> {
             try {
+                if (blurFlag) {
+                    runOnUiThread(() -> {
+                        loginReconnectBar.setVisibility(VISIBLE);
+                    });
+                }
                 Response response = client.newCall(request).execute();
                 if (response.code() == 200) {
                     runOnUiThread(() -> {
-                        Toast.makeText(this, "Connected!", Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(this, "Connected!", Toast.LENGTH_SHORT).show();
                         PreferencesClass.setServer(this, address);
                         loginConnectionStatus.setImageResource(R.drawable.link_100);
+                        if (blurFlag) {
+                            loginReconnectBar.setVisibility(INVISIBLE);
+                            Toast.makeText(this, "Connected!", Toast.LENGTH_SHORT).show();
+                        }
                     });
                 } else {
                     runOnUiThread(() -> {
                         Toast.makeText(this, "Error while trying to connect!", Toast.LENGTH_SHORT).show();
                         loginConnectionStatus.setImageResource(R.drawable.link_100);
+                        if (blurFlag) {
+                            loginReconnectBar.setVisibility(INVISIBLE);
+                        }
                     });
                 }
             } catch (Exception exception) {

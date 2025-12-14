@@ -69,6 +69,7 @@ public class InstagramFragment extends Fragment {
     private Spinner instaConnectionServerSpinner;
     private ProgressBar instaProgressBar;
     private TextView instaProgressText;
+    private ProgressBar instaReconnectBar;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstance) {
@@ -99,12 +100,15 @@ public class InstagramFragment extends Fragment {
         instaProgressBar = view.findViewById(R.id.instagramProgressBar);
         instaProgressText = view.findViewById(R.id.instagramTextProgress);
 
+        instaReconnectBar = view.findViewById(R.id.instagramReconnectBar);
+
         // quick reset
         tokenCheck();
-        checkConnection(PreferencesClass.getServer(requireContext()));
+        checkConnection(PreferencesClass.getServer(requireContext()), false);
         enableBackUI(true);
         instaProgressBar.setVisibility(INVISIBLE);
         instaProgressText.setVisibility(INVISIBLE);
+        instaReconnectBar.setVisibility(INVISIBLE);
 
         downloadButton.setVisibility(INVISIBLE);
         downloadButton.setClickable(false);
@@ -163,7 +167,7 @@ public class InstagramFragment extends Fragment {
         RequestBody payloadBody = RequestBody.create(json.toString(), MediaType.parse("application/json; charset=utf-8"));
         Request payload = new Request.Builder().url(PreferencesClass.getServer(requireContext()) + "/api/instagram/convert")
                 .addHeader("Content-Type", "application/json")
-                .addHeader("Authorization", "Bearer" + PreferencesClass.getToken(requireContext()))
+                .addHeader("Authorization", "Bearer " + PreferencesClass.getToken(requireContext()))
                 .post(payloadBody)
                 .build();
 
@@ -223,11 +227,11 @@ public class InstagramFragment extends Fragment {
             return;
         }
 
-        requireActivity().runOnUiThread(() -> {
-            instaProgressBar.setVisibility(VISIBLE);
-            instaProgressText.setText("Downloading...");
-            instaProgressText.setVisibility(VISIBLE);
-        });
+
+        instaProgressBar.setVisibility(VISIBLE);
+        instaProgressText.setText("Downloading...");
+        instaProgressText.setVisibility(VISIBLE);
+
 
         JSONObject json = new JSONObject();
 
@@ -355,7 +359,7 @@ public class InstagramFragment extends Fragment {
 
         instaConnectionRetryButton.setOnClickListener(v -> {
             String selectedServer = instaConnectionServerSpinner.getSelectedItem().toString();
-            checkConnection(selectedServer);
+            checkConnection(selectedServer, true);
         });
 
     }
@@ -428,7 +432,12 @@ public class InstagramFragment extends Fragment {
                 Response response = client.newCall(request).execute();
                 Log.d("userDebug", "Response: " + response);
 
-                if (response.code() == 200) {
+                assert response.body() != null;
+                String responseText = response.body().string();
+                JSONObject jsonObject = new JSONObject(responseText);
+                String status = jsonObject.getString("status");
+
+                if (response.code() == 200 && !status.equals("error")) {
                     requireActivity().runOnUiThread(() -> {
                         if (isAdded()) {
                             instaUser.setText(PreferencesClass.getUser(requireContext()));
@@ -462,23 +471,36 @@ public class InstagramFragment extends Fragment {
         });
     }
 
-    private void checkConnection(String address) {
+    private void checkConnection(String address, Boolean blurFlag) {
         String url = address + "/api/ping";
         Request request = new Request.Builder().url(url).get().build();
 
         new Thread(() -> {
             try {
+                if (blurFlag) {
+                    requireActivity().runOnUiThread(() -> {
+                        instaReconnectBar.setVisibility(VISIBLE);
+                    });
+                }
+
                 Response response = client.newCall(request).execute();
                 if (response.code() == 200) {
                     requireActivity().runOnUiThread(() -> {
-                        Toast.makeText(requireContext(), "Connected!", Toast.LENGTH_SHORT).show();
+                        // Toast.makeText(requireContext(), "Connected!", Toast.LENGTH_SHORT).show();
                         PreferencesClass.setServer(requireContext(), address);
                         instaConnectionButton.setImageResource(R.drawable.link_100);
+                        if (blurFlag) {
+                            instaReconnectBar.setVisibility(INVISIBLE);
+                            Toast.makeText(requireContext(), "Connected!", Toast.LENGTH_SHORT).show();
+                        }
                     });
                 } else {
                     requireActivity().runOnUiThread(() -> {
                         Toast.makeText(requireContext(), "Error while trying to connect!", Toast.LENGTH_SHORT).show();
                         instaConnectionButton.setImageResource(R.drawable.broken_link_100);
+                        if (blurFlag) {
+                            instaReconnectBar.setVisibility(INVISIBLE);
+                        }
                     });
 
                 }

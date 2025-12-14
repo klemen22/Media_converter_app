@@ -71,6 +71,7 @@ public class YoutubeFragment extends Fragment {
     private Spinner ytBlurServerSpinner;
     private ProgressBar ytProgressBar;
     private TextView ytProgressText;
+    private ProgressBar ytReconnectBar;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstance) {
@@ -100,10 +101,13 @@ public class YoutubeFragment extends Fragment {
         ytProgressBar = view.findViewById(R.id.youtubeProgressBar);
         ytProgressText = view.findViewById(R.id.youtubeTextProgress);
 
+        ytReconnectBar = view.findViewById(R.id.youtubeReconnectBar);
+
 
         tokenCheck();
-        checkConnection(PreferencesClass.getServer(requireContext()));
+        checkConnection(PreferencesClass.getServer(requireContext()), false);
         enableBackUI(true); // quick reset
+        ytReconnectBar.setVisibility(INVISIBLE);
         ytProgressBar.setVisibility(INVISIBLE);
         ytProgressText.setVisibility(INVISIBLE);
 
@@ -269,11 +273,10 @@ public class YoutubeFragment extends Fragment {
             return;
         }
 
-        requireActivity().runOnUiThread(() -> {
-            ytProgressBar.setVisibility(VISIBLE);
-            ytProgressText.setText("Downloading...");
-            ytProgressText.setVisibility(VISIBLE);
-        });
+
+        ytProgressBar.setVisibility(VISIBLE);
+        ytProgressText.setText("Downloading...");
+        ytProgressText.setVisibility(VISIBLE);
 
         JSONObject json = new JSONObject();
 
@@ -406,7 +409,7 @@ public class YoutubeFragment extends Fragment {
 
         ytBlurRetryButton.setOnClickListener(v -> {
             String selectedServer = ytBlurServerSpinner.getSelectedItem().toString();
-            checkConnection(selectedServer);
+            checkConnection(selectedServer, true);
         });
     }
 
@@ -484,7 +487,15 @@ public class YoutubeFragment extends Fragment {
                 Response response = client.newCall(request).execute();
                 Log.d("userDebug", "Response: " + response);
 
-                if (response.code() == 200) {
+                assert response.body() != null;
+                String responseText = response.body().string();
+                JSONObject jsonObject = new JSONObject(responseText);
+                String status = jsonObject.getString("status");
+
+                Log.d("userDebug", "response text body: " + responseText);
+                Log.d("userDebug", "status value: " + status);
+
+                if (response.code() == 200 && !status.equals("error")) {
                     requireActivity().runOnUiThread(() -> {
                         if (isAdded()) {
                             user.setText(PreferencesClass.getUser(requireContext()));
@@ -518,26 +529,39 @@ public class YoutubeFragment extends Fragment {
         });
     }
 
-    private void checkConnection(String address) {
+    private void checkConnection(String address, Boolean blurFlag) {
         String url = address + "/api/ping";
         Request request = new Request.Builder().url(url).get().build();
 
         new Thread(() -> {
             try {
+                if (blurFlag) {
+                    requireActivity().runOnUiThread(() -> {
+                        ytReconnectBar.setVisibility(VISIBLE);
+                    });
+                }
+
                 Response response = client.newCall(request).execute();
                 if (response.code() == 200) {
                     requireActivity().runOnUiThread(() -> {
-                        Toast.makeText(requireContext(), "Connected!", Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(requireContext(), "Connected!", Toast.LENGTH_SHORT).show();
                         PreferencesClass.setServer(requireContext(), address);
                         ytConnectionButton.setImageResource(R.drawable.link_100);
+                        if (blurFlag) {
+                            ytReconnectBar.setVisibility(INVISIBLE);
+                            Toast.makeText(requireContext(), "Connected!", Toast.LENGTH_SHORT).show();
+                        }
                     });
                 } else {
                     requireActivity().runOnUiThread(() -> {
                         Toast.makeText(requireContext(), "Error while trying to connect!", Toast.LENGTH_SHORT).show();
                         ytConnectionButton.setImageResource(R.drawable.broken_link_100);
+                        if (blurFlag) {
+                            ytReconnectBar.setVisibility(INVISIBLE);
+                        }
                     });
-
                 }
+
             } catch (Exception exception) {
                 exception.printStackTrace();
             }
