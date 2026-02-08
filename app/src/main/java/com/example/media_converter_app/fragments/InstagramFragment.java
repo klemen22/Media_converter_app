@@ -25,6 +25,7 @@ import android.widget.Toast;
 import androidx.fragment.app.Fragment;
 
 import com.example.media_converter_app.LoginActivity;
+import com.example.media_converter_app.MainActivity;
 import com.example.media_converter_app.NotificationClass;
 import com.example.media_converter_app.PreferencesClass;
 import com.example.media_converter_app.R;
@@ -36,9 +37,11 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 
 import eightbitlab.com.blurview.BlurTarget;
 import eightbitlab.com.blurview.BlurView;
+import okhttp3.Call;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -70,6 +73,10 @@ public class InstagramFragment extends Fragment {
     private ProgressBar instaProgressBar;
     private TextView instaProgressText;
     private ProgressBar instaReconnectBar;
+
+    private Runnable timeoutRun;
+    private Call currentPingCall;
+    private final android.os.Handler timeoutHandler = new android.os.Handler();
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstance) {
@@ -106,6 +113,10 @@ public class InstagramFragment extends Fragment {
         tokenCheck();
         checkConnection(PreferencesClass.getServer(requireContext()), false);
         enableBackUI(true);
+        enableConnectionUI(true);
+        unlockPager();
+        instaConnectionRetryButton.setImageResource(R.drawable.retry_50);
+
         instaProgressBar.setVisibility(INVISIBLE);
         instaProgressText.setVisibility(INVISIBLE);
         instaReconnectBar.setVisibility(INVISIBLE);
@@ -335,6 +346,8 @@ public class InstagramFragment extends Fragment {
     }
 
     private void blurBackgroundConnection() {
+        lockPager();
+
         float radius = 20f;
         Drawable windowBackground = requireActivity().getWindow().getDecorView().getBackground();
 
@@ -354,6 +367,8 @@ public class InstagramFragment extends Fragment {
         instaConnectionServerSpinner.setSelection(currentIndex);
 
         instaConnectionBackButton.setOnClickListener(v -> {
+            unlockPager();
+
             blurView.setAlpha(1f);
             blurView.animate().alpha(0f).setDuration(400).start();
             blurView.setVisibility(GONE);
@@ -363,12 +378,15 @@ public class InstagramFragment extends Fragment {
 
         instaConnectionRetryButton.setOnClickListener(v -> {
             String selectedServer = instaConnectionServerSpinner.getSelectedItem().toString();
+            enableConnectionUI(false);
             checkConnection(selectedServer, true);
         });
 
     }
 
     private void blurBackground() {
+        lockPager();
+
         float radius = 20f;
         Drawable windowBackground = requireActivity().getWindow().getDecorView().getBackground();
 
@@ -381,6 +399,8 @@ public class InstagramFragment extends Fragment {
         enableBackUI(false);
 
         instaBlurMenuBackButton.setOnClickListener(v -> {
+            unlockPager();
+
             blurView.setAlpha(1f);
             blurView.animate().alpha(0f).setDuration(400).start();
             blurView.setVisibility(GONE);
@@ -389,6 +409,8 @@ public class InstagramFragment extends Fragment {
         });
 
         instaBlurMenuLogOutButton.setOnClickListener(v -> {
+            unlockPager();
+
             PreferencesClass.clearToken(requireContext());
             PreferencesClass.clearUser(requireContext());
 
@@ -413,6 +435,11 @@ public class InstagramFragment extends Fragment {
         downloadButton.setEnabled(flag);
         instaMenuButton.setEnabled(flag);
         instaConnectionButton.setEnabled(flag);
+    }
+
+    private void enableConnectionUI(boolean flag) {
+        instaConnectionRetryButton.setEnabled(flag);
+        instaConnectionBackButton.setEnabled(flag);
     }
 
     private void tokenCheck() {
@@ -477,42 +504,112 @@ public class InstagramFragment extends Fragment {
 
     private void checkConnection(String address, Boolean blurFlag) {
         String url = address + "/api/ping";
+        OkHttpClient pingClient = client.newBuilder().connectTimeout(15, TimeUnit.SECONDS).readTimeout(15, TimeUnit.SECONDS).callTimeout(15, TimeUnit.SECONDS).build();
         Request request = new Request.Builder().url(url).get().build();
+        currentPingCall = pingClient.newCall(request);
+
+        if (blurFlag) {
+            requireActivity().runOnUiThread(() -> {
+                instaReconnectBar.setVisibility(VISIBLE);
+                instaConnectionRetryButton.setImageResource(R.drawable.close_50);
+                enableConnectionUI(false);
+            });
+
+            timeoutRun = () -> {
+                if (currentPingCall != null && !currentPingCall.isCanceled()) {
+                    currentPingCall.cancel();
+                }
+            };
+            timeoutHandler.postDelayed(timeoutRun, 60_000);
+        }
 
         new Thread(() -> {
             try {
+                instaConnectionRetryButton.setOnClickListener(v -> {
+                    if (currentPingCall != null && !currentPingCall.isCanceled()) {
+                        currentPingCall.cancel();
+                    }
+                    timeoutHandler.removeCallbacks(timeoutRun);
+                });
+
+                Response response = currentPingCall.execute();
+
                 if (blurFlag) {
-                    requireActivity().runOnUiThread(() -> {
-                        instaReconnectBar.setVisibility(VISIBLE);
-                    });
+                    timeoutHandler.removeCallbacks(timeoutRun);
                 }
 
-                Response response = client.newCall(request).execute();
                 if (response.code() == 200) {
                     requireActivity().runOnUiThread(() -> {
-                        // Toast.makeText(requireContext(), "Connected!", Toast.LENGTH_SHORT).show();
                         PreferencesClass.setServer(requireContext(), address);
                         instaConnectionButton.setImageResource(R.drawable.link_100);
+
                         if (blurFlag) {
                             instaReconnectBar.setVisibility(INVISIBLE);
+                            instaConnectionRetryButton.setImageResource(R.drawable.retry_50);
+                            enableConnectionUI(true);
                             Toast.makeText(requireContext(), "Connected!", Toast.LENGTH_SHORT).show();
                         }
+
+                        instaConnectionRetryButton.setOnClickListener(v -> {
+                            String selectedServer = instaConnectionServerSpinner.getSelectedItem().toString();
+                            enableConnectionUI(false);
+                            checkConnection(selectedServer, true);
+                        });
                     });
                 } else {
                     requireActivity().runOnUiThread(() -> {
-                        Toast.makeText(requireContext(), "Error while trying to connect!", Toast.LENGTH_SHORT).show();
+                        PreferencesClass.setServer(requireContext(), address);
                         instaConnectionButton.setImageResource(R.drawable.broken_link_100);
+
                         if (blurFlag) {
                             instaReconnectBar.setVisibility(INVISIBLE);
+                            instaConnectionRetryButton.setImageResource(R.drawable.retry_50);
+                            enableConnectionUI(true);
                         }
+
+                        instaConnectionRetryButton.setOnClickListener(v -> {
+                            String selectedServer = instaConnectionServerSpinner.getSelectedItem().toString();
+                            enableConnectionUI(false);
+                            checkConnection(selectedServer, true);
+                        });
                     });
 
                 }
             } catch (Exception exception) {
                 exception.printStackTrace();
+                PreferencesClass.setServer(requireContext(), address);
+                instaConnectionButton.setImageResource(R.drawable.broken_link_100);
+
+                if (blurFlag) {
+                    timeoutHandler.removeCallbacks(timeoutRun);
+
+                    requireActivity().runOnUiThread(() -> {
+                        instaReconnectBar.setVisibility(INVISIBLE);
+                        instaConnectionRetryButton.setImageResource(R.drawable.retry_50);
+                        enableConnectionUI(true);
+                        Toast.makeText(requireContext(), "Error while trying to connect!", Toast.LENGTH_SHORT).show();
+                    });
+
+                    instaConnectionRetryButton.setOnClickListener(v -> {
+                        String selectedServer = instaConnectionServerSpinner.getSelectedItem().toString();
+                        enableConnectionUI(false);
+                        checkConnection(selectedServer, true);
+                    });
+                }
             }
         }).start();
+    }
 
+    private void lockPager() {
+        if (getActivity() instanceof MainActivity) {
+            ((MainActivity) getActivity()).lockNavigation();
+        }
+    }
+
+    private void unlockPager() {
+        if (getActivity() instanceof MainActivity) {
+            ((MainActivity) getActivity()).unlockNavigation();
+        }
     }
 
 }

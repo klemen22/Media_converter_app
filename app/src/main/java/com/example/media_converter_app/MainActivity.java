@@ -18,6 +18,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     private ViewPager2 viewPager2;
+    private int modalCounter = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,5 +51,18 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
+    }
+
+    public void lockNavigation() {
+        modalCounter++;
+        viewPager2.setUserInputEnabled(false);
+    }
+
+    public void unlockNavigation() {
+        modalCounter--;
+        if (modalCounter <= 0) {
+            modalCounter = 0;
+            viewPager2.setUserInputEnabled(true);
+        }
     }
 }

@@ -24,9 +24,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import org.json.JSONObject;
 
 import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 
 import eightbitlab.com.blurview.BlurTarget;
 import eightbitlab.com.blurview.BlurView;
+import okhttp3.Call;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -35,7 +37,6 @@ import okhttp3.Response;
 
 public class LoginActivity extends AppCompatActivity {
 
-    public static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
     String[] availableServers = {"https://192.168.64.95:9999", "https://100.104.214.108:9999"};
     OkHttpClient client = UnsafeOkHttpClient.getUnsafeClient();
     private EditText loginUsername;
@@ -48,6 +49,9 @@ public class LoginActivity extends AppCompatActivity {
     private ImageView loginRetryBtn;
     private ImageView loginBackBtn;
     private ProgressBar loginReconnectBar;
+    private Runnable timeoutRun;
+    private Call currentPingCall;
+    private final android.os.Handler timeoutHandler = new android.os.Handler();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,6 +92,8 @@ public class LoginActivity extends AppCompatActivity {
 
         // quick reset
         enableUI(true);
+        enableConnectionUI(true);
+        loginRetryBtn.setImageResource(R.drawable.retry_50);
         loginReconnectBar.setVisibility(INVISIBLE);
 
         loginBtn.setOnClickListener(v -> {
@@ -226,6 +232,7 @@ public class LoginActivity extends AppCompatActivity {
 
         loginRetryBtn.setOnClickListener(v -> {
             String selectedServer = loginServerSelect.getSelectedItem().toString();
+            enableConnectionUI(false);
             checkConnection(selectedServer, true);
         });
 
@@ -239,37 +246,98 @@ public class LoginActivity extends AppCompatActivity {
 
     private void checkConnection(String address, Boolean blurFlag) {
         String url = address + "/api/ping";
+        OkHttpClient pingClient = client.newBuilder().connectTimeout(15, TimeUnit.SECONDS).readTimeout(15, TimeUnit.SECONDS).callTimeout(15, TimeUnit.SECONDS).build();
         Request request = new Request.Builder().url(url).get().build();
+        currentPingCall = pingClient.newCall(request);
+
+        if (blurFlag) {
+            runOnUiThread(() -> {
+                loginReconnectBar.setVisibility(VISIBLE);
+                loginRetryBtn.setImageResource(R.drawable.close_50);
+                enableConnectionUI(false);
+            });
+
+            timeoutRun = () -> {
+                if (currentPingCall != null && !currentPingCall.isCanceled()) {
+                    currentPingCall.cancel();
+                }
+            };
+
+            timeoutHandler.postDelayed(timeoutRun, 60_000);
+        }
 
         new Thread(() -> {
             try {
+                loginRetryBtn.setOnClickListener(v -> {
+                    if (currentPingCall != null && !currentPingCall.isCanceled()) {
+                        currentPingCall.cancel();
+                    }
+                    timeoutHandler.removeCallbacks(timeoutRun);
+                });
+
+                Response response = currentPingCall.execute();
+
                 if (blurFlag) {
-                    runOnUiThread(() -> {
-                        loginReconnectBar.setVisibility(VISIBLE);
-                    });
+                    timeoutHandler.removeCallbacks(timeoutRun);
                 }
-                Response response = client.newCall(request).execute();
+
                 if (response.code() == 200) {
                     runOnUiThread(() -> {
-                        //Toast.makeText(this, "Connected!", Toast.LENGTH_SHORT).show();
                         PreferencesClass.setServer(this, address);
                         loginConnectionStatus.setImageResource(R.drawable.link_100);
+
                         if (blurFlag) {
                             loginReconnectBar.setVisibility(INVISIBLE);
-                            Toast.makeText(this, "Connected!", Toast.LENGTH_SHORT).show();
+                            loginRetryBtn.setImageResource(R.drawable.retry_50);
+                            enableConnectionUI(true);
                         }
+                        Toast.makeText(this, "Connected", Toast.LENGTH_SHORT).show();
+
+                        loginRetryBtn.setOnClickListener(v -> {
+                            String selectedServer = loginServerSelect.getSelectedItem().toString();
+                            enableConnectionUI(false);
+                            checkConnection(selectedServer, true);
+                        });
                     });
                 } else {
                     runOnUiThread(() -> {
-                        Toast.makeText(this, "Error while trying to connect!", Toast.LENGTH_SHORT).show();
-                        loginConnectionStatus.setImageResource(R.drawable.link_100);
+                        PreferencesClass.setServer(this, address);
+                        loginConnectionStatus.setImageResource(R.drawable.broken_link_100);
+
                         if (blurFlag) {
                             loginReconnectBar.setVisibility(INVISIBLE);
+                            loginRetryBtn.setImageResource(R.drawable.retry_50);
+                            enableConnectionUI(true);
                         }
+
+                        loginRetryBtn.setOnClickListener(v -> {
+                            String selectedServer = loginServerSelect.getSelectedItem().toString();
+                            enableConnectionUI(false);
+                            checkConnection(selectedServer, true);
+                        });
                     });
                 }
             } catch (Exception exception) {
                 exception.printStackTrace();
+                PreferencesClass.setServer(this, address);
+                loginConnectionStatus.setImageResource(R.drawable.broken_link_100);
+
+                if (blurFlag) {
+                    timeoutHandler.removeCallbacks(timeoutRun);
+
+                    runOnUiThread(() -> {
+                        loginReconnectBar.setVisibility(INVISIBLE);
+                        loginRetryBtn.setImageResource(R.drawable.retry_50);
+                        enableConnectionUI(true);
+                        Toast.makeText(this, "Error while trying to connect!", Toast.LENGTH_SHORT).show();
+                    });
+
+                    loginRetryBtn.setOnClickListener(v -> {
+                        String selectedServer = loginServerSelect.getSelectedItem().toString();
+                        enableConnectionUI(false);
+                        checkConnection(selectedServer, true);
+                    });
+                }
             }
         }).start();
 
@@ -282,5 +350,8 @@ public class LoginActivity extends AppCompatActivity {
         loginConnectionStatus.setEnabled(flag);
     }
 
-
+    private void enableConnectionUI(boolean flag) {
+        loginBackBtn.setEnabled(flag);
+        loginServerSelect.setEnabled(flag);
+    }
 }
