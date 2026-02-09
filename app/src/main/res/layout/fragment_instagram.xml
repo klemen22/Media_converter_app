@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/dark_gray">
@@ -31,11 +32,13 @@
                     android:clickable="true"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent">
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:ignore="UseCompoundDrawables,TouchTargetSizeCheck">
 
                     <ImageView
                         android:layout_width="40dp"
                         android:layout_height="40dp"
+                        android:contentDescription="@string/account_picture"
                         android:src="@drawable/account_64" />
 
                     <TextView
@@ -44,7 +47,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:layout_marginStart="10dp"
-                        android:text="User"
+                        android:text="@string/insta_user"
                         android:textColor="@color/white"
                         android:textSize="18sp" />
 
@@ -55,6 +58,7 @@
                     android:layout_width="30dp"
                     android:layout_height="30dp"
                     android:backgroundTint="@color/gray_secondary"
+                    android:contentDescription="@string/insta_connection"
                     android:src="@drawable/broken_link_100"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
@@ -76,7 +80,7 @@
                     android:id="@+id/instagramTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Instagram Converter"
+                    android:text="@string/instagram_converter"
                     android:textColor="@color/white"
                     android:textSize="30sp" />
 
@@ -86,12 +90,15 @@
                     android:layout_height="40dp"
                     android:layout_marginTop="20dp"
                     android:background="@color/dark_gray"
-                    android:hint="Enter Instagram URL..."
+                    android:hint="@string/enter_instagram_url"
+                    android:importantForAutofill="no"
+                    android:inputType="text"
                     android:paddingTop="18dp"
                     android:paddingBottom="2dp"
                     android:textColor="@color/white"
                     android:textColorHint="@color/white"
-                    android:textSize="18sp" />
+                    android:textSize="18sp"
+                    tools:ignore="TouchTargetSizeCheck,VisualLintTextFieldSize" />
 
                 <View
                     android:layout_width="wrap_content"
@@ -108,7 +115,8 @@
                     <Spinner
                         android:id="@+id/instagramDropDownType"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        tools:ignore="TouchTargetSizeCheck" />
                 </LinearLayout>
             </LinearLayout>
 
@@ -116,7 +124,7 @@
                 android:id="@+id/instagramTextProgress"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Converting..."
+                android:text="@string/insta_converting"
                 android:textColor="@color/gray_secondary"
                 android:visibility="invisible"
                 app:layout_constraintBottom_toTopOf="@+id/instagramProgressBar"
@@ -147,13 +155,14 @@
                 android:backgroundTint="@color/gray_secondary"
                 android:clickable="true"
                 android:padding="14dp"
-                android:text="Convert"
+                android:text="@string/insta_convert"
                 android:textColor="@color/white"
                 android:textSize="16sp"
                 android:visibility="visible"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent" />
+                app:layout_constraintStart_toStartOf="parent"
+                tools:ignore="VisualLintButtonSize" />
 
             <Button
                 android:id="@+id/instagramDownloadBtn"
@@ -163,13 +172,14 @@
                 android:backgroundTint="@color/gray_secondary"
                 android:clickable="false"
                 android:padding="14dp"
-                android:text="Download"
+                android:text="@string/insta_download"
                 android:textSize="16sp"
                 android:textColor="@color/white"
                 android:visibility="invisible"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent" />
+                app:layout_constraintStart_toStartOf="parent"
+                tools:ignore="VisualLintButtonSize" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </eightbitlab.com.blurview.BlurTarget>
@@ -194,6 +204,7 @@
                 android:layout_height="50dp"
                 android:layout_marginBottom="20dp"
                 android:clickable="true"
+                android:contentDescription="@string/insta_back"
                 android:src="@drawable/back_arrow_50" />
 
             <ImageView
@@ -203,6 +214,7 @@
                 android:layout_marginStart="5dp"
                 android:layout_marginBottom="20dp"
                 android:clickable="true"
+                android:contentDescription="@string/insta_log_out"
                 android:src="@drawable/logout_50" />
 
             <ImageView
@@ -210,6 +222,7 @@
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:clickable="true"
+                android:contentDescription="@string/insta_info"
                 android:src="@drawable/info_50" />
 
         </LinearLayout>
@@ -253,12 +266,14 @@
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:layout_marginBottom="20dp"
+                android:contentDescription="@string/insta_retry"
                 android:src="@drawable/retry_50" />
 
             <ImageView
                 android:id="@+id/instagramBlurBack"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
+                android:contentDescription="@string/insta_back2"
                 android:src="@drawable/back_arrow_50" />
 
         </LinearLayout>

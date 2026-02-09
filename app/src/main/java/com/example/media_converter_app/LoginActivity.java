@@ -101,12 +101,11 @@ public class LoginActivity extends AppCompatActivity {
             Login();
         });
 
-        loginConnectionStatus.setOnClickListener(v -> {
-            blurBackground();
-        });
+        loginConnectionStatus.setOnClickListener(v -> blurBackground());
     }
 
 
+    @SuppressWarnings("CallToPrintStackTrace")
     private void autoLogin(String token) {
         String url = PreferencesClass.getServer(this) + "/api/user_info";
 
@@ -117,9 +116,7 @@ public class LoginActivity extends AppCompatActivity {
             try {
                 Response response = client.newCall(request).execute();
                 if (!response.isSuccessful()) {
-                    runOnUiThread(() -> {
-                        Toast.makeText(this, "Error: " + response.code(), Toast.LENGTH_SHORT).show();
-                    });
+                    runOnUiThread(() -> Toast.makeText(this, "Error: " + response.code(), Toast.LENGTH_SHORT).show());
                     return;
                 }
 
@@ -140,20 +137,17 @@ public class LoginActivity extends AppCompatActivity {
 
                 } else {
                     PreferencesClass.clearToken(this);
-                    runOnUiThread(() -> {
-                        Toast.makeText(this, "Session expired!", Toast.LENGTH_SHORT).show();
-                    });
+                    runOnUiThread(() -> Toast.makeText(this, R.string.session_expiredLogin, Toast.LENGTH_SHORT).show());
                 }
 
             } catch (Exception exception) {
                 exception.printStackTrace();
-                runOnUiThread(() -> {
-                    Toast.makeText(this, "Error: " + exception, Toast.LENGTH_SHORT).show();
-                });
+                runOnUiThread(() -> Toast.makeText(this, "Error: " + exception, Toast.LENGTH_SHORT).show());
             }
         }).start();
     }
 
+    @SuppressWarnings("CallToPrintStackTrace")
     private void Login() {
         String username = loginUsername.getText().toString();
         String password = loginPassword.getText().toString();
@@ -198,16 +192,12 @@ public class LoginActivity extends AppCompatActivity {
 
                     String message = responseJsonObject.getString("message"); // separate string because of exception
 
-                    runOnUiThread(() -> {
-                        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
-                    });
+                    runOnUiThread(() -> Toast.makeText(this, message, Toast.LENGTH_SHORT).show());
                 }
 
             } catch (Exception exception) {
                 exception.printStackTrace();
-                runOnUiThread(() -> {
-                    Toast.makeText(this, "Error: " + exception, Toast.LENGTH_SHORT).show();
-                });
+                runOnUiThread(() -> Toast.makeText(this, "Error: " + exception, Toast.LENGTH_SHORT).show());
             }
         }).start();
 
@@ -244,6 +234,7 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
+    @SuppressWarnings("CallToPrintStackTrace")
     private void checkConnection(String address, Boolean blurFlag) {
         String url = address + "/api/ping";
         OkHttpClient pingClient = client.newBuilder().connectTimeout(15, TimeUnit.SECONDS).readTimeout(15, TimeUnit.SECONDS).callTimeout(15, TimeUnit.SECONDS).build();

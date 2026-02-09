@@ -1,5 +1,7 @@
 package com.example.media_converter_app;
 
+import android.annotation.SuppressLint;
+
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.util.concurrent.TimeUnit;
@@ -18,12 +20,14 @@ public class UnsafeOkHttpClient {
 
     public static OkHttpClient getUnsafeClient() {
         try {
-            final TrustManager[] trustAllCerts = new TrustManager[]{
+            @SuppressLint("CustomX509TrustManager") final TrustManager[] trustAllCerts = new TrustManager[]{
                     new X509TrustManager() {
+                        @SuppressLint("TrustAllX509TrustManager")
                         @Override
                         public void checkClientTrusted(X509Certificate[] chain, String authType) {
                         }
 
+                        @SuppressLint("TrustAllX509TrustManager")
                         @Override
                         public void checkServerTrusted(X509Certificate[] chain, String authType) {
                         }
@@ -49,6 +53,7 @@ public class UnsafeOkHttpClient {
             builder.sslSocketFactory(sslSocketFactory, (X509TrustManager) trustAllCerts[0]);
 
             builder.hostnameVerifier(new HostnameVerifier() {
+                @SuppressLint("BadHostnameVerifier")
                 @Override
                 public boolean verify(String hostname, SSLSession session) {
                     return true;

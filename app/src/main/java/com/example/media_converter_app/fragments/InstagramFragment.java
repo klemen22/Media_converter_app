@@ -141,17 +141,14 @@ public class InstagramFragment extends Fragment {
             startConverting();
         });
 
-        instaMenuButton.setOnClickListener(v -> {
-            blurBackground();
-        });
+        instaMenuButton.setOnClickListener(v -> blurBackground());
 
-        instaConnectionButton.setOnClickListener(v -> {
-            blurBackgroundConnection();
-        });
+        instaConnectionButton.setOnClickListener(v -> blurBackgroundConnection());
 
         return view;
     }
 
+    @SuppressWarnings("CallToPrintStackTrace")
     private void startConverting() {
 
         String instaURL = inputURL.getText().toString();
@@ -159,7 +156,7 @@ public class InstagramFragment extends Fragment {
         JSONObject json = new JSONObject();
 
         instaProgressBar.setVisibility(VISIBLE);
-        instaProgressText.setText("Converting...");
+        instaProgressText.setText(R.string.converting);
         instaProgressText.setVisibility(VISIBLE);
 
         if (instaURL.isEmpty()) {
@@ -228,6 +225,7 @@ public class InstagramFragment extends Fragment {
 
     }
 
+    @SuppressWarnings("CallToPrintStackTrace")
     private void downloadInstagramContent(String filename) {
         if (filename == null) {
             requireActivity().runOnUiThread(() -> {
@@ -242,7 +240,7 @@ public class InstagramFragment extends Fragment {
 
 
         instaProgressBar.setVisibility(VISIBLE);
-        instaProgressText.setText("Downloading...");
+        instaProgressText.setText(R.string.downloading);
         instaProgressText.setVisibility(VISIBLE);
 
 
@@ -276,6 +274,7 @@ public class InstagramFragment extends Fragment {
                 }
 
                 // --- download file ---
+                assert response.body() != null;
                 InputStream inputStream = response.body().byteStream();
                 File downloadDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
                 File file = new File(downloadDirectory, filename);
@@ -421,11 +420,7 @@ public class InstagramFragment extends Fragment {
             requireActivity().finish();
         });
 
-        instaBlurMenuInfoButton.setOnClickListener(v -> {
-            requireActivity().runOnUiThread(() -> {
-                Toast.makeText(requireContext(), "Boomshakalaka", Toast.LENGTH_SHORT).show();
-            });
-        });
+        instaBlurMenuInfoButton.setOnClickListener(v -> requireActivity().runOnUiThread(() -> Toast.makeText(requireContext(), "Boomshakalaka", Toast.LENGTH_SHORT).show()));
     }
 
     private void enableBackUI(boolean flag) {
@@ -442,6 +437,7 @@ public class InstagramFragment extends Fragment {
         instaConnectionBackButton.setEnabled(flag);
     }
 
+    @SuppressWarnings("CallToPrintStackTrace")
     private void tokenCheck() {
         String savedToken = PreferencesClass.getToken(requireContext());
         if (savedToken == null) {
@@ -479,9 +475,7 @@ public class InstagramFragment extends Fragment {
                     redirectToLoginOnce();
                 }
             } catch (Exception exception) {
-                requireActivity().runOnUiThread(() -> {
-                    instaUser.setText("User");
-                });
+                requireActivity().runOnUiThread(() -> instaUser.setText(R.string.user));
                 exception.printStackTrace();
                 redirectToLoginOnce();
             }
@@ -502,6 +496,7 @@ public class InstagramFragment extends Fragment {
         });
     }
 
+    @SuppressWarnings("CallToPrintStackTrace")
     private void checkConnection(String address, Boolean blurFlag) {
         String url = address + "/api/ping";
         OkHttpClient pingClient = client.newBuilder().connectTimeout(15, TimeUnit.SECONDS).readTimeout(15, TimeUnit.SECONDS).callTimeout(15, TimeUnit.SECONDS).build();

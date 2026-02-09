@@ -1,14 +1,19 @@
 package com.example.media_converter_app;
 
+import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.os.Build;
 
+import androidx.annotation.RequiresPermission;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
 public class NotificationClass {
+    @SuppressLint("ObsoleteSdkInt")
+    @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
     public static void pushNotification(Context context, String type, String filename) {
         if (context == null) return;
 

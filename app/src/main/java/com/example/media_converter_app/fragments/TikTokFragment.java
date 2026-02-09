@@ -126,22 +126,19 @@ public class TikTokFragment extends Fragment {
             startConverting();
         });
 
-        tiktokMenuButton.setOnClickListener(v -> {
-            blurBackground();
-        });
+        tiktokMenuButton.setOnClickListener(v -> blurBackground());
 
-        tiktokConnectionButton.setOnClickListener(v -> {
-            blurBackgroundConnection();
-        });
+        tiktokConnectionButton.setOnClickListener(v -> blurBackgroundConnection());
 
         return view;
     }
 
+    @SuppressWarnings("CallToPrintStackTrace")
     private void startConverting() {
         String tikURL = inputURL.getText().toString();
         JSONObject json = new JSONObject();
         tiktokProgressBar.setVisibility(VISIBLE);
-        tiktokProgressText.setText("Converting...");
+        tiktokProgressText.setText(R.string.convertingTikTok);
         tiktokProgressText.setVisibility(VISIBLE);
 
         if (tikURL.isEmpty()) {
@@ -205,13 +202,12 @@ public class TikTokFragment extends Fragment {
             } catch (Exception exception) {
                 exception.printStackTrace();
 
-                requireActivity().runOnUiThread(() -> {
-                    Toast.makeText(requireContext(), "Error: " + exception, Toast.LENGTH_SHORT).show();
-                });
+                requireActivity().runOnUiThread(() -> Toast.makeText(requireContext(), "Error: " + exception, Toast.LENGTH_SHORT).show());
             }
         }).start();
     }
 
+    @SuppressWarnings("CallToPrintStackTrace")
     private void downloadTikTikMedia(String filename) {
         if (filename == null) {
             requireActivity().runOnUiThread(() -> {
@@ -226,7 +222,7 @@ public class TikTokFragment extends Fragment {
 
 
         tiktokProgressBar.setVisibility(VISIBLE);
-        tiktokProgressText.setText("Downloading...");
+        tiktokProgressText.setText(R.string.downloadingTikTok);
         tiktokProgressText.setVisibility(VISIBLE);
 
         JSONObject json = new JSONObject();
@@ -258,6 +254,7 @@ public class TikTokFragment extends Fragment {
                     return;
                 }
 
+                assert response.body() != null;
                 InputStream inputStream = response.body().byteStream();
                 File downloadDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
                 File file = new File(downloadDirectory, filename);
@@ -367,11 +364,7 @@ public class TikTokFragment extends Fragment {
             requireActivity().finish();
         });
 
-        tiktokBlurInfo.setOnClickListener(v -> {
-            requireActivity().runOnUiThread(() -> {
-                Toast.makeText(requireContext(), "Boomshakalaka", Toast.LENGTH_SHORT).show();
-            });
-        });
+        tiktokBlurInfo.setOnClickListener(v -> requireActivity().runOnUiThread(() -> Toast.makeText(requireContext(), "Boomshakalaka", Toast.LENGTH_SHORT).show()));
     }
 
     private void blurBackgroundConnection() {
@@ -427,6 +420,7 @@ public class TikTokFragment extends Fragment {
         tiktokConnectionSpinner.setEnabled(flag);
     }
 
+    @SuppressWarnings("CallToPrintStackTrace")
     private void tokenCheck() {
         String savedToken = PreferencesClass.getToken(requireContext());
         if (savedToken == null) {
@@ -464,9 +458,7 @@ public class TikTokFragment extends Fragment {
                     redirectToLoginOnce();
                 }
             } catch (Exception exception) {
-                requireActivity().runOnUiThread(() -> {
-                    tiktokUser.setText("User");
-                });
+                requireActivity().runOnUiThread(() -> tiktokUser.setText(R.string.userTikTok));
                 exception.printStackTrace();
                 redirectToLoginOnce();
             }
@@ -487,6 +479,7 @@ public class TikTokFragment extends Fragment {
         });
     }
 
+    @SuppressWarnings("CallToPrintStackTrace")
     private void checkConnection(String address, Boolean blurFlag) {
         String url = address + "/api/ping";
         OkHttpClient pingClient = client.newBuilder().connectTimeout(15, TimeUnit.SECONDS).readTimeout(15, TimeUnit.SECONDS).callTimeout(15, TimeUnit.SECONDS).build();

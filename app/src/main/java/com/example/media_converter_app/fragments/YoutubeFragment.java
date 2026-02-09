@@ -179,24 +179,21 @@ public class YoutubeFragment extends Fragment {
             startConverting();
         });
 
-        ytMenuButton.setOnClickListener(v -> {
-            blurBackground();
-        });
+        ytMenuButton.setOnClickListener(v -> blurBackground());
 
-        ytConnectionButton.setOnClickListener(v -> {
-            blurBackgroundConnection();
-        });
+        ytConnectionButton.setOnClickListener(v -> blurBackgroundConnection());
 
         return view;
     }
 
+    @SuppressWarnings("CallToPrintStackTrace")
     private void startConverting() {
         String resolution = "";
         String ytURL = inputURL.getText().toString();
         String mediaType = spinnerType.getSelectedItem().toString();
         JSONObject json = new JSONObject();
         ytProgressBar.setVisibility(VISIBLE);
-        ytProgressText.setText("Converting...");
+        ytProgressText.setText(R.string.convertingYT);
         ytProgressText.setVisibility(VISIBLE);
 
         if (ytURL.isEmpty()) {
@@ -276,6 +273,7 @@ public class YoutubeFragment extends Fragment {
 
     }
 
+    @SuppressWarnings("CallToPrintStackTrace")
     private void downloadYoutubeMedia(String filename) {
         if (filename == null) {
             requireActivity().runOnUiThread(() -> {
@@ -290,7 +288,7 @@ public class YoutubeFragment extends Fragment {
 
 
         ytProgressBar.setVisibility(VISIBLE);
-        ytProgressText.setText("Downloading...");
+        ytProgressText.setText(R.string.downloadingYT);
         ytProgressText.setVisibility(VISIBLE);
 
         JSONObject json = new JSONObject();
@@ -324,6 +322,7 @@ public class YoutubeFragment extends Fragment {
                 }
 
                 // --- download file ---
+                assert response.body() != null;
                 InputStream inputStream = response.body().byteStream();
                 File downloadDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
                 File file = new File(downloadDirectory, filename);
@@ -474,11 +473,7 @@ public class YoutubeFragment extends Fragment {
 
         });
 
-        infoButton.setOnClickListener(v -> {
-            requireActivity().runOnUiThread(() -> {
-                Toast.makeText(requireContext(), "Boomshakalaka", Toast.LENGTH_SHORT).show();
-            });
-        });
+        infoButton.setOnClickListener(v -> requireActivity().runOnUiThread(() -> Toast.makeText(requireContext(), "Boomshakalaka", Toast.LENGTH_SHORT).show()));
 
     }
 
@@ -497,6 +492,7 @@ public class YoutubeFragment extends Fragment {
         ytBlurServerSpinner.setEnabled(flag);
     }
 
+    @SuppressWarnings("CallToPrintStackTrace")
     private void tokenCheck() {
         String savedToken = PreferencesClass.getToken(requireContext());
         if (savedToken == null) {
@@ -537,9 +533,7 @@ public class YoutubeFragment extends Fragment {
                     redirectToLoginOnce();
                 }
             } catch (Exception exception) {
-                requireActivity().runOnUiThread(() -> {
-                    user.setText("User");
-                });
+                requireActivity().runOnUiThread(() -> user.setText(R.string.userYT));
                 exception.printStackTrace();
                 redirectToLoginOnce();
             }
@@ -560,6 +554,7 @@ public class YoutubeFragment extends Fragment {
         });
     }
 
+    @SuppressWarnings("CallToPrintStackTrace")
     private void checkConnection(String address, Boolean blurFlag) {
         String url = address + "/api/ping";
         OkHttpClient pingClient = client.newBuilder().connectTimeout(15, TimeUnit.SECONDS).readTimeout(15, TimeUnit.SECONDS).callTimeout(15, TimeUnit.SECONDS).build();
